@@ -1,0 +1,41 @@
+name: Deploy Frontend (Flutter Web)
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ main ]   # opcional: deploy automático ao dar push na main
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Build (Flutter Web)
+        run: |
+          flutter clean
+          flutter build web --release --web-renderer canvaskit \
+            --dart-define=API_BASE_URL=/api
+
+      - name: Add known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${{ secrets.SSH_PORT || 22 }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy via rsync
+        uses: burnett01/rsync-deployments@6.0
+        with:
+          switches: -avzr --delete
+          path: build/web/
+          remote_path: /var/www/pinacle.com.br/
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key:  ${{ secrets.SSH_KEY }}
+          remote_port: ${{ secrets.SSH_PORT || 22 }}

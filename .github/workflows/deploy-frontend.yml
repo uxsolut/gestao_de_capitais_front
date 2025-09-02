@@ -30,7 +30,7 @@ jobs:
           ssh-keyscan -p "${{ secrets.SSH_PORT || 22 }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Deploy via rsync
-        uses: burnett01/rsync-deployments@6.0
+        uses: burnett01/rsync-deployments@v6.0
         with:
           switches: -avzr --delete
           path: build/web/

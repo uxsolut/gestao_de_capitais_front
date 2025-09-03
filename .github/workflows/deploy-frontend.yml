@@ -18,13 +18,19 @@ jobs:
         with:
           channel: stable
 
+      - name: Flutter info + enable web
+        run: |
+          flutter --version
+          flutter config --enable-web
+          flutter doctor -v
+
       - name: Build (Flutter Web)
         run: |
           flutter clean
-          flutter build web --release --web-renderer canvaskit \
+          # Sem --web-renderer para evitar o erro; o Flutter escolhe o melhor para release
+          flutter build web --release \
             --dart-define=API_BASE_URL=/api
 
-      # Prepara a chave SSH a partir do Secret e adiciona o host na known_hosts
       - name: Prepare SSH key
         run: |
           mkdir -p ~/.ssh
@@ -32,7 +38,6 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -p "${{ secrets.SSH_PORT || 22 }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
 
-      # Faz o deploy com rsync nativo
       - name: Deploy with rsync
         run: |
           rsync -avzr --delete \

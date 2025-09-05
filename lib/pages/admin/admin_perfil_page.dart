@@ -1,4 +1,3 @@
-/*
 import 'package:flutter/material.dart';
 
 class AdminPerfilPage extends StatelessWidget {
@@ -40,4 +39,3 @@ class AdminPerfilPage extends StatelessWidget {
     );
   }
 }
-*/

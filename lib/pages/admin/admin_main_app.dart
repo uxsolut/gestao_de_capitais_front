@@ -1,4 +1,3 @@
-/*
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/navegacao_controller.dart';
@@ -458,5 +457,3 @@ class _AdminMainAppState extends State<AdminMainApp> with TickerProviderStateMix
     );
   }
 }
-
-*/

@@ -1,16 +1,26 @@
+// lib/routers/app_router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-// Importação das páginas
+// -------- Páginas públicas --------
 import '../pages/home_page.dart';
 import '../pages/login_page.dart';
+
+// -------- Cliente (mantido intacto) --------
 import '../pages/cliente/cliente_dashboard_page.dart';
 import '../pages/cliente/cliente_carteiras_page.dart';
 import '../pages/cliente/cliente_contas_page.dart';
 import '../pages/cliente/trading_bot_page.dart';
 
-// Widget compartilhado
+// Widget compartilhado do cliente (menu inferior)
 import '../widgets/menu_inferior.dart';
+
+// -------- Admin (novas rotas) --------
+import '../pages/admin/admin_main_app.dart';
+import '../pages/admin/admin_estrategias_page.dart';
+import '../pages/admin/admin_corretores_page.dart';
+import '../pages/admin/admin_ordens_page.dart';
+import '../pages/admin/admin_perfil_page.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -18,16 +28,18 @@ final GoRouter appRouter = GoRouter(
     // Página inicial
     GoRoute(
       path: '/',
+      name: 'home',
       builder: (context, state) => const HomePage(),
     ),
 
     // Página de login
     GoRoute(
       path: '/login',
+      name: 'login',
       builder: (context, state) => const LoginPage(),
     ),
 
-    // Rotas do cliente com Shell (menu inferior fixo)
+    // =================== ROTAS DO CLIENTE (mantidas) ===================
     ShellRoute(
       builder: (context, state, child) {
         final location = state.uri.toString();
@@ -64,12 +76,14 @@ final GoRouter appRouter = GoRouter(
       routes: [
         GoRoute(
           path: '/cliente/dashboard',
+          name: 'cliente.dashboard',
           pageBuilder: (context, state) => const NoTransitionPage(
             child: ClienteDashboardPage(),
           ),
         ),
         GoRoute(
           path: '/cliente/carteiras',
+          name: 'cliente.carteiras',
           pageBuilder: (context, state) => const NoTransitionPage(
             child: ClienteCarteirasPage(),
           ),
@@ -77,6 +91,7 @@ final GoRouter appRouter = GoRouter(
         // Rota dinâmica para CONTAS da carteira
         GoRoute(
           path: '/cliente/contas/:id',
+          name: 'cliente.contas',
           pageBuilder: (context, state) {
             final carteiraId = state.pathParameters['id']!;
             return NoTransitionPage(
@@ -84,17 +99,53 @@ final GoRouter appRouter = GoRouter(
             );
           },
         ),
-        // ✅ Trading Bot dentro do Shell + recebendo ID do robô
+        // Trading Bot dentro do Shell + recebendo ID do robô
         GoRoute(
-          name: 'tradingBot',
+          name: 'cliente.tradingBot',
           path: '/cliente/trading-bot/:id',
           pageBuilder: (context, state) => NoTransitionPage(
             child: TradingBotPage(
-              idRobo: state.pathParameters['id']!, // <-- pega o ID da URL
+              idRobo: state.pathParameters['id']!,
             ),
           ),
         ),
+
+        // Opcional: mantenha se você tiver essa tela
+        GoRoute(
+          path: '/cliente/estrategias',
+          name: 'cliente.estrategias',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: ClienteDashboardPage(), // substitua pela página correta se houver
+          ),
+        ),
       ],
+    ),
+
+    // =================== ROTAS DO ADMIN (novas) ===================
+    GoRoute(
+      path: '/admin',
+      name: 'admin.home',
+      builder: (context, state) => const AdminMainAppPage(),
+    ),
+    GoRoute(
+      path: '/admin/estrategias',
+      name: 'admin.estrategias',
+      builder: (context, state) => const AdminEstrategiasPage(),
+    ),
+    GoRoute(
+      path: '/admin/corretoras',
+      name: 'admin.corretoras',
+      builder: (context, state) => const AdminCorretorasPage(),
+    ),
+    GoRoute(
+      path: '/admin/ordens',
+      name: 'admin.ordens',
+      builder: (context, state) => const AdminOrdensPage(),
+    ),
+    GoRoute(
+      path: '/admin/perfil',
+      name: 'admin.perfil',
+      builder: (context, state) => const AdminPerfilPage(),
     ),
   ],
 );

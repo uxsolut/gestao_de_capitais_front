@@ -1,8 +1,9 @@
+// lib/pages/admin/admin_main_app.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/navegacao_controller.dart';
-import '../../controllers/admin_dashboard_controller.dart'; // <- usa o controller do ADMIN
+import '../../controllers/admin_dashboard_controller.dart';
 
 import '../home_page.dart';
 import '../login_page.dart';
@@ -68,6 +69,7 @@ class _AdminMainAppState extends State<AdminMainApp> with TickerProviderStateMix
   Widget _buildCurrentPage(NavegacaoController nav, AdminDashboardController dash) {
     if (nav.estado == EstadoNavegacao.login) return const LoginPage();
 
+    // opcional manter; o switch abaixo já cobre
     if (nav.estado == EstadoNavegacao.dashboard) {
       return _buildDashboardContent(dash);
     }
@@ -75,6 +77,8 @@ class _AdminMainAppState extends State<AdminMainApp> with TickerProviderStateMix
     switch (nav.estado) {
       case EstadoNavegacao.home:
         return const HomePage();
+      case EstadoNavegacao.dashboard: // garante exaustividade em web build
+        return _buildDashboardContent(dash);
       case EstadoNavegacao.equipe:
         return _buildPlaceholderPage('Equipe Admin', Icons.group);
       case EstadoNavegacao.contratar:
@@ -220,7 +224,7 @@ class _AdminMainAppState extends State<AdminMainApp> with TickerProviderStateMix
         return 3;
       case EstadoNavegacao.contato:
         return 4;
-      case EstadoNavegacao.login: // 👈 adicionado para ficar exaustivo no web build
+      case EstadoNavegacao.login: // exaustivo
         return 0;
     }
   }

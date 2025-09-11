@@ -18,7 +18,7 @@ import '../widgets/menu_inferior.dart';
 // -------- Admin (novas rotas) --------
 import '../pages/admin/admin_main_app.dart';
 import '../pages/admin/admin_estrategias_page.dart';
-import '../pages/admin/admin_corretores_page.dart';
+import '../pages/admin/admin_corretoras_page.dart';
 import '../pages/admin/admin_ordens_page.dart';
 import '../pages/admin/admin_perfil_page.dart';
 
@@ -109,13 +109,12 @@ final GoRouter appRouter = GoRouter(
             ),
           ),
         ),
-
-        // Opcional: mantenha se você tiver essa tela
+        // (Opcional) mantenha se você tiver essa tela específica
         GoRoute(
           path: '/cliente/estrategias',
           name: 'cliente.estrategias',
           pageBuilder: (context, state) => const NoTransitionPage(
-            child: ClienteDashboardPage(), // substitua pela página correta se houver
+            child: ClienteDashboardPage(), // troque se houver página própria
           ),
         ),
       ],
@@ -125,7 +124,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/admin',
       name: 'admin.home',
-      builder: (context, state) => const AdminMainAppPage(),
+      builder: (context, state) => const AdminMainApp(),
     ),
     GoRoute(
       path: '/admin/estrategias',

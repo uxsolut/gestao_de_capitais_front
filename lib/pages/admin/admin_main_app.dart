@@ -49,26 +49,19 @@ class _AdminMainAppState extends State<AdminMainApp> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    // Se você já fornece esses providers globalmente, remova o MultiProvider abaixo
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => NavegacaoController()),
-        ChangeNotifierProvider(create: (_) => AdminDashboardController()),
-      ],
-      child: Consumer2<NavegacaoController, AdminDashboardController>(
-        builder: (context, navController, dashController, child) {
-          return Scaffold(
-            backgroundColor: const Color(0xFF1a1a1a),
-            body: FadeTransition(
-              opacity: _fadeAnimation,
-              child: _buildCurrentPage(navController, dashController),
-            ),
-            bottomNavigationBar: _buildBottomNavigationBar(navController, dashController),
-            floatingActionButton: _buildFloatingActionButton(navController, dashController),
-            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-          );
-        },
-      ),
+    return Consumer2<NavegacaoController, AdminDashboardController>(
+      builder: (context, navController, dashController, child) {
+        return Scaffold(
+          backgroundColor: const Color(0xFF1a1a1a),
+          body: FadeTransition(
+            opacity: _fadeAnimation,
+            child: _buildCurrentPage(navController, dashController),
+          ),
+          bottomNavigationBar: _buildBottomNavigationBar(navController, dashController),
+          floatingActionButton: _buildFloatingActionButton(navController, dashController),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        );
+      },
     );
   }
 
@@ -88,8 +81,8 @@ class _AdminMainAppState extends State<AdminMainApp> with TickerProviderStateMix
         return _buildPlaceholderPage('Contratar Admin', Icons.shopping_cart);
       case EstadoNavegacao.contato:
         return _buildPlaceholderPage('Contato Admin', Icons.contact_mail);
-      default:
-        return const HomePage();
+      case EstadoNavegacao.login:
+        return const LoginPage();
     }
   }
 
@@ -129,11 +122,15 @@ class _AdminMainAppState extends State<AdminMainApp> with TickerProviderStateMix
           children: [
             Icon(icon, size: 80, color: const Color(0xFF4285f4)),
             const SizedBox(height: 20),
-            Text(title,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
             const SizedBox(height: 10),
-            const Text('Área Administrativa - Em desenvolvimento...',
-                style: TextStyle(fontSize: 16, color: Colors.white70)),
+            const Text(
+              'Área Administrativa - Em desenvolvimento...',
+              style: TextStyle(fontSize: 16, color: Colors.white70),
+            ),
           ],
         ),
       ),
@@ -223,6 +220,8 @@ class _AdminMainAppState extends State<AdminMainApp> with TickerProviderStateMix
         return 3;
       case EstadoNavegacao.contato:
         return 4;
+      case EstadoNavegacao.login: // 👈 adicionado para ficar exaustivo no web build
+        return 0;
     }
   }
 
@@ -294,8 +293,10 @@ class _AdminMainAppState extends State<AdminMainApp> with TickerProviderStateMix
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Menu Admin',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+            const Text(
+              'Menu Admin',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
             const SizedBox(height: 20),
             _buildMenuOption(
               icon: Icons.login,
@@ -333,8 +334,10 @@ class _AdminMainAppState extends State<AdminMainApp> with TickerProviderStateMix
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Menu Dashboard Admin',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+            const Text(
+              'Menu Dashboard Admin',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
             const SizedBox(height: 20),
             _buildMenuOption(
               icon: Icons.list_alt,

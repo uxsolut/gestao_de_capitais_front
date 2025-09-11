@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+// Controllers (CLIENTE)
 import 'controllers/dashboard_controller.dart' as cliente;
 import 'controllers/login_controller.dart';
 import 'controllers/home_controller.dart';
 import 'controllers/theme_controller.dart';
 import 'controllers/cliente_carteiras_controller.dart';
 
+// Controllers (ADMIN)
+import 'controllers/navegacao_controller.dart';
+import 'controllers/admin_dashboard_controller.dart';
+
+// Tema e Rotas
 import 'themes/theme.dart';
 import 'routers/app_router.dart'; // ÚNICA fonte do appRouter
 
@@ -22,6 +28,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // ----- Providers do CLIENTE -----
         ChangeNotifierProvider<cliente.DashboardController>(
           create: (_) => cliente.DashboardController(),
         ),
@@ -40,6 +47,14 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<ClienteCarteirasController>(
           create: (_) => ClienteCarteirasController(),
+        ),
+
+        // ----- Providers do ADMIN -----
+        ChangeNotifierProvider<NavegacaoController>(
+          create: (_) => NavegacaoController(),
+        ),
+        ChangeNotifierProvider<AdminDashboardController>(
+          create: (_) => AdminDashboardController(),
         ),
       ],
       child: Consumer<ThemeController>(

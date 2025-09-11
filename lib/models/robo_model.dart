@@ -33,3 +33,5 @@ class RoboModel {
     };
   }
 }
+
+typedef Robo = RoboModel;

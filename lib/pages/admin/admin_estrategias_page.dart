@@ -620,12 +620,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                             return;
                           }
 
-                          setState(() {});
-                          (context as Element).markNeedsBuild();
-                          // usa o setDialogState pra travar o botão
-                          // ignore: invalid_use_of_protected_member
-                          (context as StatefulElement).setState(() {});
                           setDialogState(() => _isCreating = true);
+                          
                           try {
                             final nome = _nomeController.text.trim();
                             final idAtivo = _ativoSelecionado!.id; // int

@@ -312,45 +312,60 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
                 ),
               ),
               // ações e data
-              Row(
-                children: [
-                  if (robo.criadoEm != null)
-                    Text(
-                      dateFormat.format(robo.criadoEm!),
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.download,
-                        color: Colors.lightBlueAccent, size: 20),
-                    tooltip: 'Baixar arquivo do robô',
-                    onPressed: () {
-                      _confirmarDownloadRobo(robo.id, robo.nome);
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.edit,
-                        color: Colors.orangeAccent, size: 20),
-                    tooltip: 'Editar robô',
-                    onPressed: () {
-                      _showEditarRoboDialog(robo);
-                    },
-                  ),
-                  IconButton(
-                    icon:
-                        const Icon(Icons.delete, color: Colors.redAccent, size: 20),
-                    tooltip: 'Excluir robô',
-                    onPressed: () {
-                      _confirmarExclusaoRobo(robo.id, robo.nome);
-                    },
-                  ),
-                ],
-              ),
-            ],
+              // Cabeçalho do card
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    // nome do robô
+    Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            robo.nome,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
           ),
+          const SizedBox(height: 4),
+          // se quiser exibir algo do ativo no futuro, coloque aqui
+        ],
+      ),
+    ),
+    // ações e data
+    Row(
+      children: [
+        if (robo.criadoEm != null)
+          Text(
+            dateFormat.format(robo.criadoEm!),
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+            ),
+          ),
+        const SizedBox(width: 8),
+        IconButton(
+          icon: const Icon(Icons.download, color: Colors.lightBlueAccent, size: 20),
+          tooltip: 'Baixar arquivo do robô',
+          onPressed: () => _confirmarDownloadRobo(robo.id, robo.nome),
+        ),
+        IconButton(
+          icon: const Icon(Icons.edit, color: Colors.orangeAccent, size: 20),
+          tooltip: 'Editar robô',
+          onPressed: () => _showEditarRoboDialog(robo),
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete, color: Colors.redAccent, size: 20),
+          tooltip: 'Excluir robô',
+          onPressed: () => _confirmarExclusaoRobo(robo.id, robo.nome),
+        ),
+      ],
+    ),
+  ],
+),
+
 
           // performance chips
           if (robo.performance != null && robo.performance!.isNotEmpty) ...[

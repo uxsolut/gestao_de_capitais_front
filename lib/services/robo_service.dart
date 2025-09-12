@@ -63,9 +63,10 @@ class RoboService {
   }
 
   /// POST /robos/
+  /// (antes tinha 'symbol'; agora usa 'id_ativo')
   Future<Map<String, dynamic>> criarRobo({
     required String nome,
-    required String symbol,
+    required int idAtivo,                 // <- trocado
     required List<String> performance,
     PlatformFile? arquivoWeb,
     Uint8List? arquivoBytes,
@@ -103,9 +104,11 @@ class RoboService {
 
       final formData = FormData.fromMap({
         'nome': nome,
-        'symbol': symbol,
-        'performance': performance,
-        'arquivo': arquivo,
+        'id_ativo': idAtivo,              // <- trocado (era 'symbol')
+        'performance': performance,       // mantém como estava (lista)
+        // mantém compatibilidade de chave do arquivo:
+        'arquivo': arquivo,               // antigo
+        'arquivo_robo': arquivo,          // novo (se o backend espera esse nome)
       });
 
       final response = await dio.post(
@@ -114,7 +117,7 @@ class RoboService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return response.data;
+        return Map<String, dynamic>.from(response.data);
       } else if (response.statusCode == 401) {
         _httpService.handleTokenExpired();
         throw Exception('Token expirado. Faça login novamente.');
@@ -127,11 +130,12 @@ class RoboService {
     }
   }
 
-  /// PUT /robos/
+  /// PUT /robos/{id}
+  /// (antes tinha 'symbol'; agora usa 'id_ativo')
   Future<void> editarRobo({
     required int id,
     String? nome,
-    String? symbol,
+    int? idAtivo,                        // <- trocado
     List<String>? performance,
     PlatformFile? arquivoWeb,
     Uint8List? arquivoBytes,
@@ -147,7 +151,7 @@ class RoboService {
       final Map<String, dynamic> dataMap = {};
 
       if (nome != null) dataMap['nome'] = nome;
-      if (symbol != null) dataMap['symbol'] = symbol;
+      if (idAtivo != null) dataMap['id_ativo'] = idAtivo;   // <- trocado
       if (performance != null) dataMap['performance'] = performance;
 
       // Arquivo (opcional)
@@ -158,12 +162,15 @@ class RoboService {
             filename: arquivoWeb.name,
             contentType: MediaType('application', 'octet-stream'),
           );
+          dataMap['arquivo_robo'] = dataMap['arquivo']; // compatibilidade
         }
       } else if (arquivoMobile != null) {
-        dataMap['arquivo'] = await MultipartFile.fromFile(
+        final mf = await MultipartFile.fromFile(
           arquivoMobile.path,
           filename: arquivoMobile.path.split('/').last,
         );
+        dataMap['arquivo'] = mf;
+        dataMap['arquivo_robo'] = mf; // compatibilidade
       }
 
       final formData = FormData.fromMap(dataMap);
@@ -182,7 +189,7 @@ class RoboService {
     }
   }
 
-  /// DELETE /robos/
+  /// DELETE /robos/{id}
   Future<void> excluirRobo(int roboId) async {
     try {
       final token = await _httpService.getToken();
@@ -204,44 +211,43 @@ class RoboService {
 
   /// GET /robos/download/:id
   Future<void> baixarArquivo(int roboId, String nomeRobo) async {
-  try {
-    final token = await _httpService.getToken();
-    if (token == null) throw Exception('Token não encontrado');
+    try {
+      final token = await _httpService.getToken();
+      if (token == null) throw Exception('Token não encontrado');
 
-    final url = Uri.parse('${ApiConfig.baseUrl}/robos/download/$roboId');
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
-    );
+      final url = Uri.parse('${ApiConfig.baseUrl}/robos/download/$roboId');
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      // use o nome direto, sanitizado
-      String fileName = 'arquivo_${_sanitizeFileName(nomeRobo)}.ex5';
+      if (response.statusCode == 200) {
+        // use o nome direto, sanitizado
+        String fileName = 'arquivo_${_sanitizeFileName(nomeRobo)}.ex5';
 
-      final blob = html.Blob([response.bodyBytes]);
-      final urlDownload = html.Url.createObjectUrlFromBlob(blob);
-      html.AnchorElement(href: urlDownload)
-        ..setAttribute("download", fileName)
-        ..click();
-      html.Url.revokeObjectUrl(urlDownload);
-    } else if (response.statusCode == 401) {
-      throw Exception("Não autorizado. Faça login novamente.");
-    } else {
-      throw Exception("Erro ao baixar arquivo: ${response.statusCode}");
+        final blob = html.Blob([response.bodyBytes]);
+        final urlDownload = html.Url.createObjectUrlFromBlob(blob);
+        html.AnchorElement(href: urlDownload)
+          ..setAttribute("download", fileName)
+          ..click();
+        html.Url.revokeObjectUrl(urlDownload);
+      } else if (response.statusCode == 401) {
+        throw Exception("Não autorizado. Faça login novamente.");
+      } else {
+        throw Exception("Erro ao baixar arquivo: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Erro no download do robô: $e");
+      rethrow;
     }
-  } catch (e) {
-    print("Erro no download do robô: $e");
-    rethrow;
   }
-}
 
-String _sanitizeFileName(String input) {
-  return input
-      .replaceAll(RegExp(r'[^\w\s.-]'), '')
-      .replaceAll(' ', '_')
-      .toLowerCase();
-}
-
+  String _sanitizeFileName(String input) {
+    return input
+        .replaceAll(RegExp(r'[^\w\s.-]'), '')
+        .replaceAll(' ', '_')
+        .toLowerCase();
+  }
 }

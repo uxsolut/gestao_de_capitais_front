@@ -470,7 +470,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
                       onChanged: (v) =>
                           setDialogState(() => _ativoSelecionado = v),
                       decoration: const InputDecoration(
-                        labelText: 'Ativo (descrição)',
+                        labelText: 'Ativo',
                         labelStyle: TextStyle(color: Colors.white70),
                         enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white30)),

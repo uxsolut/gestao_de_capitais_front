@@ -1,15 +1,16 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io' as io;
+
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:file_picker/file_picker.dart';
-import '../models/robo_model.dart';
-import '../config/api_config.dart';
-import 'http_service.dart';
-import 'package:dio/dio.dart';
-import 'dart:html' as html;
 import 'package:http_parser/http_parser.dart';
+
+import '../config/api_config.dart';
+import '../models/robo_model.dart';
+import 'http_service.dart';
 
 class RoboService {
   final HttpService _httpService = HttpService();
@@ -40,8 +41,7 @@ class RoboService {
       final token = await _httpService.getToken();
       if (token == null) throw Exception('Token não encontrado.');
 
-      final dio = Dio();
-      dio.options.headers['Authorization'] = 'Bearer $token';
+      final dio = Dio()..options.headers['Authorization'] = 'Bearer $token';
 
       final response = await dio.get(
         '${ApiConfig.baseUrl}${ApiConfig.robosEndpoint}/disponiveis',
@@ -49,12 +49,15 @@ class RoboService {
       );
 
       if (response.statusCode == 200) {
-        return (response.data as List).map((json) => Robo.fromJson(json)).toList();
+        return (response.data as List)
+            .map((json) => Robo.fromJson(json))
+            .toList();
       } else if (response.statusCode == 401) {
         _httpService.handleTokenExpired();
         throw Exception('Token expirado. Faça login novamente.');
       } else {
-        throw Exception('Erro ao buscar robôs disponíveis: ${response.statusCode}');
+        throw Exception(
+            'Erro ao buscar robôs disponíveis: ${response.statusCode}');
       }
     } catch (e) {
       print('Erro ao buscar robôs disponíveis: $e');
@@ -63,10 +66,14 @@ class RoboService {
   }
 
   /// POST /robos/
-  /// (antes tinha 'symbol'; agora usa 'id_ativo')
+  /// Envia campos via multipart:
+  /// - nome (string)
+  /// - id_ativo (int/string)
+  /// - performance (vários campos repetidos)
+  /// - arquivo_robo (UploadFile)
   Future<Map<String, dynamic>> criarRobo({
     required String nome,
-    required int idAtivo,                 // <- trocado
+    required int idAtivo,
     required List<String> performance,
     PlatformFile? arquivoWeb,
     Uint8List? arquivoBytes,
@@ -74,42 +81,47 @@ class RoboService {
   }) async {
     try {
       final token = await _httpService.getToken();
-      if (token == null) throw Exception('Token não encontrado. Faça login novamente.');
-
-      final dio = Dio();
-      dio.options.headers['Authorization'] = 'Bearer $token';
-
-      // Arquivo principal
-      MultipartFile arquivo;
-      if (kIsWeb) {
-        if (arquivoWeb != null && arquivoBytes != null) {
-          arquivo = MultipartFile.fromBytes(
-            arquivoBytes,
-            filename: arquivoWeb.name,
-            contentType: MediaType('application', 'octet-stream'),
-          );
-        } else {
-          throw Exception('Arquivo não selecionado para Web.');
-        }
-      } else {
-        if (arquivoMobile != null) {
-          arquivo = await MultipartFile.fromFile(
-            arquivoMobile.path,
-            filename: arquivoMobile.path.split('/').last,
-          );
-        } else {
-          throw Exception('Arquivo não selecionado para Mobile/Desktop.');
-        }
+      if (token == null) {
+        throw Exception('Token não encontrado. Faça login novamente.');
       }
 
-      final formData = FormData.fromMap({
-        'nome': nome,
-        'id_ativo': idAtivo,              // <- trocado (era 'symbol')
-        'performance': performance,       // mantém como estava (lista)
-        // mantém compatibilidade de chave do arquivo:
-        'arquivo': arquivo,               // antigo
-        'arquivo_robo': arquivo,          // novo (se o backend espera esse nome)
-      });
+      final dio = Dio()..options.headers['Authorization'] = 'Bearer $token';
+
+      // --- Arquivo ---
+      MultipartFile arquivo;
+      if (kIsWeb) {
+        if (arquivoWeb == null || arquivoBytes == null) {
+          throw Exception('Arquivo não selecionado para Web.');
+        }
+        arquivo = MultipartFile.fromBytes(
+          arquivoBytes,
+          filename: arquivoWeb.name,
+          contentType: MediaType('application', 'octet-stream'),
+        );
+      } else {
+        if (arquivoMobile == null) {
+          throw Exception('Arquivo não selecionado para Mobile/Desktop.');
+        }
+        arquivo = await MultipartFile.fromFile(
+          arquivoMobile.path,
+          filename: arquivoMobile.path.split('/').last,
+        );
+      }
+
+      // --- FormData montado manualmente ---
+      final formData = FormData();
+
+      // Campos simples
+      formData.fields.add(MapEntry('nome', nome));
+      formData.fields.add(MapEntry('id_ativo', idAtivo.toString()));
+
+      // Lista de performance -> campos repetidos "performance"
+      for (final p in performance) {
+        formData.fields.add(MapEntry('performance', p));
+      }
+
+      // Arquivo com a chave esperada pelo backend
+      formData.files.add(MapEntry('arquivo_robo', arquivo));
 
       final response = await dio.post(
         '${ApiConfig.baseUrl}${ApiConfig.robosEndpoint}/',
@@ -122,7 +134,9 @@ class RoboService {
         _httpService.handleTokenExpired();
         throw Exception('Token expirado. Faça login novamente.');
       } else {
-        throw Exception('Erro ao criar robô: ${response.statusCode} - ${response.data}');
+        throw Exception(
+          'Erro ao criar robô: ${response.statusCode} - ${response.data}',
+        );
       }
     } catch (e) {
       print('Erro ao criar robô (Dio): $e');
@@ -131,11 +145,12 @@ class RoboService {
   }
 
   /// PUT /robos/{id}
-  /// (antes tinha 'symbol'; agora usa 'id_ativo')
+  /// Envia apenas o que mudou. Para performance, envia os itens como
+  /// múltiplos campos "performance".
   Future<void> editarRobo({
     required int id,
     String? nome,
-    int? idAtivo,                        // <- trocado
+    int? idAtivo,
     List<String>? performance,
     PlatformFile? arquivoWeb,
     Uint8List? arquivoBytes,
@@ -145,35 +160,39 @@ class RoboService {
       final token = await _httpService.getToken();
       if (token == null) throw Exception('Token não encontrado. Faça login novamente.');
 
-      final dio = Dio();
-      dio.options.headers['Authorization'] = 'Bearer $token';
+      final dio = Dio()..options.headers['Authorization'] = 'Bearer $token';
 
-      final Map<String, dynamic> dataMap = {};
+      final formData = FormData();
 
-      if (nome != null) dataMap['nome'] = nome;
-      if (idAtivo != null) dataMap['id_ativo'] = idAtivo;   // <- trocado
-      if (performance != null) dataMap['performance'] = performance;
+      if (nome != null) {
+        formData.fields.add(MapEntry('nome', nome));
+      }
+      if (idAtivo != null) {
+        formData.fields.add(MapEntry('id_ativo', idAtivo.toString()));
+      }
+      if (performance != null) {
+        for (final p in performance) {
+          formData.fields.add(MapEntry('performance', p));
+        }
+      }
 
-      // Arquivo (opcional)
+      // arquivo opcional
       if (kIsWeb) {
         if (arquivoWeb != null && arquivoBytes != null) {
-          dataMap['arquivo'] = MultipartFile.fromBytes(
+          final mf = MultipartFile.fromBytes(
             arquivoBytes,
             filename: arquivoWeb.name,
             contentType: MediaType('application', 'octet-stream'),
           );
-          dataMap['arquivo_robo'] = dataMap['arquivo']; // compatibilidade
+          formData.files.add(MapEntry('arquivo_robo', mf));
         }
       } else if (arquivoMobile != null) {
         final mf = await MultipartFile.fromFile(
           arquivoMobile.path,
           filename: arquivoMobile.path.split('/').last,
         );
-        dataMap['arquivo'] = mf;
-        dataMap['arquivo_robo'] = mf; // compatibilidade
+        formData.files.add(MapEntry('arquivo_robo', mf));
       }
-
-      final formData = FormData.fromMap(dataMap);
 
       final response = await dio.put(
         '${ApiConfig.baseUrl}${ApiConfig.robosEndpoint}/$id',
@@ -216,38 +235,32 @@ class RoboService {
       if (token == null) throw Exception('Token não encontrado');
 
       final url = Uri.parse('${ApiConfig.baseUrl}/robos/download/$roboId');
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
-      );
+      final response = await http.get(url, headers: {'Authorization': 'Bearer $token'});
 
       if (response.statusCode == 200) {
-        // use o nome direto, sanitizado
-        String fileName = 'arquivo_${_sanitizeFileName(nomeRobo)}.ex5';
+        // web only
+        // ignore: avoid_web_libraries_in_flutter
+        import 'dart:html' as html;
 
+        final fileName = _sanitizeFileName('arquivo_$nomeRobo').toLowerCase() + '.ex5';
         final blob = html.Blob([response.bodyBytes]);
         final urlDownload = html.Url.createObjectUrlFromBlob(blob);
         html.AnchorElement(href: urlDownload)
-          ..setAttribute("download", fileName)
+          ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(urlDownload);
       } else if (response.statusCode == 401) {
-        throw Exception("Não autorizado. Faça login novamente.");
+        throw Exception('Não autorizado. Faça login novamente.');
       } else {
-        throw Exception("Erro ao baixar arquivo: ${response.statusCode}");
+        throw Exception('Erro ao baixar arquivo: ${response.statusCode}');
       }
     } catch (e) {
-      print("Erro no download do robô: $e");
+      print('Erro no download do robô: $e');
       rethrow;
     }
   }
 
   String _sanitizeFileName(String input) {
-    return input
-        .replaceAll(RegExp(r'[^\w\s.-]'), '')
-        .replaceAll(' ', '_')
-        .toLowerCase();
+    return input.replaceAll(RegExp(r'[^\w\s.-]'), '').replaceAll(' ', '_');
   }
 }

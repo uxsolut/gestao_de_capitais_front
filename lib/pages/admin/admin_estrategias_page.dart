@@ -20,10 +20,11 @@ class AdminEstrategiasPage extends StatefulWidget {
   State<AdminEstrategiasPage> createState() => _AdminEstrategiasPageState();
 }
 
-class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with TickerProviderStateMixin {
+class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
+    with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-  
+
   List<Robo> _robos = [];
   bool _isLoading = true;
   String? _errorMessage;
@@ -61,6 +62,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
 
     try {
       final robos = await _roboService.getRobos();
+
       setState(() {
         _robos = robos;
         _isLoading = false;
@@ -80,7 +82,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
   @override
   Widget build(BuildContext context) {
     final isMobile = _isMobile(context);
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a1a),
       body: SafeArea(
@@ -94,7 +96,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                 // Header
                 _buildHeader(isMobile),
                 SizedBox(height: isMobile ? 16 : 24),
-                
+
                 // Content
                 Expanded(
                   child: _buildContent(isMobile),
@@ -277,7 +279,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
 
   Widget _buildRoboItem(Robo robo, bool isMobile) {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
-    
+
     return Container(
       margin: EdgeInsets.symmetric(
         horizontal: isMobile ? 16 : 20,
@@ -303,17 +305,9 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      robo.nome,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    // (Symbol removido – se quiser, pode exibir a descrição do ativo aqui quando tiver no modelo)
+                  children: const [
+                    // nome
+                    // (Symbol removido – se quiser, pode exibir a descrição do ativo quando estiver no modelo)
                   ],
                 ),
               ),
@@ -330,21 +324,24 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                     ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.download, color: Colors.lightBlueAccent, size: 20),
+                    icon: const Icon(Icons.download,
+                        color: Colors.lightBlueAccent, size: 20),
                     tooltip: 'Baixar arquivo do robô',
                     onPressed: () {
                       _confirmarDownloadRobo(robo.id, robo.nome);
                     },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.orangeAccent, size: 20),
+                    icon: const Icon(Icons.edit,
+                        color: Colors.orangeAccent, size: 20),
                     tooltip: 'Editar robô',
                     onPressed: () {
                       _showEditarRoboDialog(robo);
                     },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.redAccent, size: 20),
+                    icon:
+                        const Icon(Icons.delete, color: Colors.redAccent, size: 20),
                     tooltip: 'Excluir robô',
                     onPressed: () {
                       _confirmarExclusaoRobo(robo.id, robo.nome);
@@ -370,21 +367,26 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
             Wrap(
               spacing: 8,
               runSpacing: 4,
-              children: robo.performance!.map((perf) => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF34a853).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  perf,
-                  style: const TextStyle(
-                    color: Color(0xFF34a853),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              )).toList(),
+              children: robo.performance!
+                  .map(
+                    (perf) => Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF34a853).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        perf,
+                        style: const TextStyle(
+                          color: Color(0xFF34a853),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         ],
@@ -462,7 +464,9 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                         ),
                       ),
                       validator: (value) =>
-                          (value == null || value.isEmpty) ? 'Nome é obrigatório' : null,
+                          (value == null || value.isEmpty)
+                              ? 'Nome é obrigatório'
+                              : null,
                     ),
                     const SizedBox(height: 16),
 
@@ -477,7 +481,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                                       child: Text(a.descricao),
                                     ))
                                 .toList(),
-                            onChanged: (v) => setDialogState(() => _ativoSelecionado = v),
+                            onChanged: (v) =>
+                                setDialogState(() => _ativoSelecionado = v),
                             decoration: const InputDecoration(
                               labelText: 'Ativo (descrição)',
                               labelStyle: TextStyle(color: Colors.white70),
@@ -488,7 +493,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                                 borderSide: BorderSide(color: Color(0xFF4285f4)),
                               ),
                             ),
-                            validator: (v) => v == null ? 'Selecione um ativo' : null,
+                            validator: (v) =>
+                                v == null ? 'Selecione um ativo' : null,
                             dropdownColor: const Color(0xFF2d2d2d),
                             style: const TextStyle(color: Colors.white),
                           ),
@@ -513,9 +519,11 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                               borderSide: BorderSide(color: Color(0xFF4285f4)),
                             ),
                             suffixIcon: IconButton(
-                              icon: const Icon(Icons.add, color: Color(0xFF4285f4)),
+                              icon: const Icon(Icons.add,
+                                  color: Color(0xFF4285f4)),
                               onPressed: () {
-                                final texto = _performanceController.text.trim();
+                                final texto =
+                                    _performanceController.text.trim();
                                 if (texto.isNotEmpty) {
                                   setDialogState(() {
                                     _listaPerformance.add(texto);
@@ -533,8 +541,10 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                             return Chip(
                               label: Text(item),
                               backgroundColor: Colors.green.withOpacity(0.2),
-                              labelStyle: const TextStyle(color: Colors.green),
-                              deleteIcon: const Icon(Icons.close, size: 18),
+                              labelStyle:
+                                  const TextStyle(color: Colors.green),
+                              deleteIcon:
+                                  const Icon(Icons.close, size: 18),
                               onDeleted: () {
                                 setDialogState(() {
                                   _listaPerformance.remove(item);
@@ -572,17 +582,20 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                             _selectedPlatformFile != null
                                 ? 'Arquivo: ${_selectedPlatformFile!.name}'
                                 : 'Nenhum arquivo selecionado',
-                            style: const TextStyle(color: Colors.white70),
+                            style:
+                                const TextStyle(color: Colors.white70),
                           ),
                           const SizedBox(height: 8),
                           ElevatedButton(
                             onPressed: () async {
-                              FilePickerResult? result =
-                                  await FilePicker.platform.pickFiles(withData: true);
+                              final result = await FilePicker.platform
+                                  .pickFiles(withData: true);
                               if (result != null) {
                                 setDialogState(() {
-                                  _selectedPlatformFile = result.files.first;
-                                  _fileBytes = result.files.first.bytes;
+                                  _selectedPlatformFile =
+                                      result.files.first;
+                                  _fileBytes =
+                                      result.files.first.bytes;
                                 });
                               }
                             },
@@ -600,8 +613,10 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
             ),
             actions: [
               TextButton(
-                onPressed: _isCreating ? null : () => Navigator.pop(context),
-                child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+                onPressed:
+                    _isCreating ? null : () => Navigator.pop(context),
+                child: const Text('Cancelar',
+                    style: TextStyle(color: Colors.white70)),
               ),
               ElevatedButton(
                 onPressed: _isCreating
@@ -613,7 +628,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                           if (_listaPerformance.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Adicione pelo menos uma performance'),
+                                content: Text(
+                                    'Adicione pelo menos uma performance'),
                                 backgroundColor: Colors.orange,
                               ),
                             );
@@ -621,14 +637,14 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                           }
 
                           setDialogState(() => _isCreating = true);
-                          
+
                           try {
                             final nome = _nomeController.text.trim();
                             final idAtivo = _ativoSelecionado!.id; // int
                             final performance = _listaPerformance;
 
                             // === criar robô (agora com id_ativo) ===
-                            final robo = await _roboService.criarRobo(
+                            await _roboService.criarRobo(
                               nome: nome,
                               idAtivo: idAtivo,
                               performance: performance,
@@ -637,12 +653,14 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                             );
 
                             // === fluxos já existentes ===
-                            final aplicacao = await _aplicacaoService.criarAplicacao(
+                            final aplicacao =
+                                await _aplicacaoService.criarAplicacao(
                               nome: 'robo $nome',
                               tipo: 'backend',
                             );
 
-                            final versao = await _versaoAplicacaoService.criarVersaoAplicacao(
+                            final versao = await _versaoAplicacaoService
+                                .criarVersaoAplicacao(
                               descricao: 'versao 1 do robo $nome',
                               arquivo: _selectedPlatformFile!,
                               idAplicacao: aplicacao.id,
@@ -658,7 +676,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Robô criado com sucesso!'),
+                                content:
+                                    Text('Robô criado com sucesso!'),
                                 backgroundColor: Color(0xFF34a853),
                               ),
                             );
@@ -666,7 +685,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                             setDialogState(() => _isCreating = false);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Erro ao criar robô e aplicações: $e'),
+                                content: Text(
+                                    'Erro ao criar robô e aplicações: $e'),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -689,7 +709,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Text('Criar'),
@@ -704,9 +725,12 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
   // ========== D I Á L O G O   D E   E D I Ç Ã O ==========
   void _showEditarRoboDialog(Robo robo) {
     final _formKey = GlobalKey<FormState>();
-    final TextEditingController _nomeController = TextEditingController(text: robo.nome);
-    final TextEditingController _performanceController = TextEditingController();
-    final List<String> _listaPerformance = List<String>.from(robo.performance ?? []);
+    final TextEditingController _nomeController =
+        TextEditingController(text: robo.nome);
+    final TextEditingController _performanceController =
+        TextEditingController();
+    final List<String> _listaPerformance =
+        List<String>.from(robo.performance ?? []);
 
     // dropdown de ativos
     List<AtivoResumo> _ativos = [];
@@ -747,7 +771,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
 
           return AlertDialog(
             backgroundColor: const Color(0xFF2d2d2d),
-            title: Text('Editar ${robo.nome}', style: const TextStyle(color: Colors.white)),
+            title: Text('Editar ${robo.nome}',
+                style: const TextStyle(color: Colors.white)),
             content: SizedBox(
               width: 420,
               child: Form(
@@ -769,8 +794,9 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                           borderSide: BorderSide(color: Color(0xFF4285f4)),
                         ),
                       ),
-                      validator: (value) =>
-                          (value == null || value.isEmpty) ? 'Nome é obrigatório' : null,
+                      validator: (value) => (value == null || value.isEmpty)
+                          ? 'Nome é obrigatório'
+                          : null,
                     ),
                     const SizedBox(height: 16),
 
@@ -825,9 +851,11 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                               borderSide: BorderSide(color: Color(0xFF4285f4)),
                             ),
                             suffixIcon: IconButton(
-                              icon: const Icon(Icons.add, color: Color(0xFF4285f4)),
+                              icon: const Icon(Icons.add,
+                                  color: Color(0xFF4285f4)),
                               onPressed: () {
-                                final texto = _performanceController.text.trim();
+                                final texto =
+                                    _performanceController.text.trim();
                                 if (texto.isNotEmpty) {
                                   setDialogState(() {
                                     _listaPerformance.add(texto);
@@ -846,8 +874,10 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                             return Chip(
                               label: Text(item),
                               backgroundColor: Colors.green.withOpacity(0.2),
-                              labelStyle: const TextStyle(color: Colors.green),
-                              deleteIcon: const Icon(Icons.close, size: 18),
+                              labelStyle:
+                                  const TextStyle(color: Colors.green),
+                              deleteIcon:
+                                  const Icon(Icons.close, size: 18),
                               onDeleted: () {
                                 setDialogState(() {
                                   _listaPerformance.remove(item);
@@ -886,7 +916,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                             _selectedPlatformFile != null
                                 ? 'Arquivo: ${_selectedPlatformFile!.name}'
                                 : 'Nenhum arquivo selecionado',
-                            style: const TextStyle(color: Colors.white70),
+                            style:
+                                const TextStyle(color: Colors.white70),
                           ),
                           const SizedBox(height: 8),
                           Row(
@@ -894,24 +925,28 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                             children: [
                               ElevatedButton(
                                 onPressed: () async {
-                                  FilePickerResult? result =
-                                      await FilePicker.platform.pickFiles(withData: true);
+                                  final result = await FilePicker.platform
+                                      .pickFiles(withData: true);
                                   if (result != null) {
                                     setDialogState(() {
-                                      _selectedPlatformFile = result.files.first;
-                                      _fileBytes = result.files.first.bytes;
+                                      _selectedPlatformFile =
+                                          result.files.first;
+                                      _fileBytes =
+                                          result.files.first.bytes;
                                     });
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF4285f4),
+                                  backgroundColor:
+                                      const Color(0xFF4285f4),
                                 ),
                                 child: const Text('Selecionar Arquivo'),
                               ),
                               if (_selectedPlatformFile != null) ...[
                                 const SizedBox(width: 8),
                                 IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.redAccent),
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.redAccent),
                                   onPressed: () {
                                     setDialogState(() {
                                       _selectedPlatformFile = null;
@@ -931,8 +966,10 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
             ),
             actions: [
               TextButton(
-                onPressed: _isUpdating ? null : () => Navigator.pop(context),
-                child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+                onPressed:
+                    _isUpdating ? null : () => Navigator.pop(context),
+                child: const Text('Cancelar',
+                    style: TextStyle(color: Colors.white70)),
               ),
               ElevatedButton(
                 onPressed: _isUpdating
@@ -948,8 +985,11 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                                   ? null
                                   : _nomeController.text.trim(),
                               // envia id_ativo apenas se o usuário trocou
-                              idAtivo: _ativoAlterado ? _ativoSelecionado?.id : null,
-                              performance: _performanceAlterada ? _listaPerformance : null,
+                              idAtivo:
+                                  _ativoAlterado ? _ativoSelecionado?.id : null,
+                              performance: _performanceAlterada
+                                  ? _listaPerformance
+                                  : null,
                               arquivoWeb: _selectedPlatformFile,
                               arquivoBytes: _fileBytes,
                             );
@@ -959,7 +999,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Robô atualizado com sucesso!'),
+                                content:
+                                    Text('Robô atualizado com sucesso!'),
                                 backgroundColor: Color(0xFF34a853),
                               ),
                             );
@@ -967,7 +1008,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                             setDialogState(() => _isUpdating = false);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Erro ao atualizar robô: $e'),
+                                content:
+                                    Text('Erro ao atualizar robô: $e'),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -983,7 +1025,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Text('Confirmar'),
@@ -1012,7 +1055,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+            child: const Text('Cancelar',
+                style: TextStyle(color: Colors.white70)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -1035,9 +1079,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
                 );
               }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-            ),
+            style:
+                ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             child: const Text('Excluir'),
           ),
         ],
@@ -1061,7 +1104,8 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage> with Ticker
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+            child: const Text('Cancelar',
+                style: TextStyle(color: Colors.white70)),
           ),
           ElevatedButton.icon(
             icon: const Icon(Icons.download, size: 18),

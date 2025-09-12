@@ -9,7 +9,7 @@ import '../../widgets/topo_fixo.dart';
 import '../../services/aplicacao_service.dart';
 import '../../services/versao_aplicacao_service.dart';
 
-// >>> novos imports para o dropdown de ativos
+// Dropdown de ativos
 import '../../services/ativos_service.dart';
 import '../../models/ativo_resumo.dart';
 
@@ -40,10 +40,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    );
+    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut);
     _fadeController.forward();
     _loadRobos();
   }
@@ -62,7 +59,6 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
 
     try {
       final robos = await _roboService.getRobos();
-
       setState(() {
         _robos = robos;
         _isLoading = false;
@@ -75,9 +71,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
     }
   }
 
-  bool _isMobile(BuildContext context) {
-    return MediaQuery.of(context).size.width < 768;
-  }
+  bool _isMobile(BuildContext context) => MediaQuery.of(context).size.width < 768;
 
   @override
   Widget build(BuildContext context) {
@@ -93,21 +87,16 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 _buildHeader(isMobile),
                 SizedBox(height: isMobile ? 16 : 24),
-
-                // Content
-                Expanded(
-                  child: _buildContent(isMobile),
-                ),
+                Expanded(child: _buildContent(isMobile)),
               ],
             ),
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showCreateRoboDialog(),
+        onPressed: _showCreateRoboDialog,
         backgroundColor: const Color(0xFF4285f4),
         child: const Icon(Icons.add),
       ),
@@ -123,9 +112,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.arrow_back, color: Colors.white),
             ),
             const SizedBox(width: 8),
@@ -158,11 +145,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red.withOpacity(0.7),
-            ),
+            Icon(Icons.error_outline, size: 64, color: Colors.red.withOpacity(0.7)),
             const SizedBox(height: 16),
             Text(
               'Erro ao carregar robôs',
@@ -175,18 +158,13 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
             const SizedBox(height: 8),
             Text(
               _errorMessage!,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _loadRobos,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4285f4),
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4285f4)),
               child: const Text('Tentar Novamente'),
             ),
           ],
@@ -199,11 +177,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.smart_toy_outlined,
-              size: 64,
-              color: Colors.white.withOpacity(0.5),
-            ),
+            Icon(Icons.smart_toy_outlined, size: 64, color: Colors.white.withOpacity(0.5)),
             const SizedBox(height: 16),
             Text(
               'Nenhum robô encontrado',
@@ -216,10 +190,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
             const SizedBox(height: 8),
             const Text(
               'Não há robôs de trading cadastrados no sistema',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.white70, fontSize: 14),
               textAlign: TextAlign.center,
             ),
           ],
@@ -227,9 +198,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
       );
     }
 
-    return SingleChildScrollView(
-      child: _buildRobosList(isMobile),
-    );
+    return SingleChildScrollView(child: _buildRobosList(isMobile));
   }
 
   Widget _buildRobosList(bool isMobile) {
@@ -237,13 +206,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
       decoration: BoxDecoration(
         color: const Color(0xFF2d2d2d),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,19 +218,10 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
               children: [
                 Text(
                   'Robôs de Trading (${_robos.length})',
-                  style: TextStyle(
-                    fontSize: isMobile ? 16 : 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
+                  style: TextStyle(fontSize: isMobile ? 16 : 18, fontWeight: FontWeight.w600, color: Colors.white),
                 ),
-                Text(
-                  'Total: ${_robos.length} robô${_robos.length != 1 ? 's' : ''}',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
-                ),
+                Text('Total: ${_robos.length} robô${_robos.length != 1 ? 's' : ''}',
+                    style: const TextStyle(color: Colors.white70, fontSize: 14)),
               ],
             ),
           ),
@@ -281,18 +235,12 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
     return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: isMobile ? 16 : 20,
-        vertical: 8,
-      ),
+      margin: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 20, vertical: 8),
       padding: EdgeInsets.all(isMobile ? 16 : 20),
       decoration: BoxDecoration(
         color: const Color(0xFF1a1a1a),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: const Color(0xFF4285f4).withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFF4285f4).withOpacity(0.3), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,107 +249,75 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // nome do robô
+              // Nome do robô
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    // nome
-                    // (Symbol removido – se quiser, pode exibir a descrição do ativo quando estiver no modelo)
+                  children: [
+                    Text(
+                      robo.nome,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Se quiser exibir algo do ativo no futuro, coloque aqui
                   ],
                 ),
               ),
-              // ações e data
-              // Cabeçalho do card
-Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-    // nome do robô
-    Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            robo.nome,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+              // Ações e data
+              Row(
+                children: [
+                  if (robo.criadoEm != null)
+                    Text(
+                      dateFormat.format(robo.criadoEm!),
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.download, color: Colors.lightBlueAccent, size: 20),
+                    tooltip: 'Baixar arquivo do robô',
+                    onPressed: () => _confirmarDownloadRobo(robo.id, robo.nome),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.orangeAccent, size: 20),
+                    tooltip: 'Editar robô',
+                    onPressed: () => _showEditarRoboDialog(robo),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.redAccent, size: 20),
+                    tooltip: 'Excluir robô',
+                    onPressed: () => _confirmarExclusaoRobo(robo.id, robo.nome),
+                  ),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          // se quiser exibir algo do ativo no futuro, coloque aqui
-        ],
-      ),
-    ),
-    // ações e data
-    Row(
-      children: [
-        if (robo.criadoEm != null)
-          Text(
-            dateFormat.format(robo.criadoEm!),
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-            ),
-          ),
-        const SizedBox(width: 8),
-        IconButton(
-          icon: const Icon(Icons.download, color: Colors.lightBlueAccent, size: 20),
-          tooltip: 'Baixar arquivo do robô',
-          onPressed: () => _confirmarDownloadRobo(robo.id, robo.nome),
-        ),
-        IconButton(
-          icon: const Icon(Icons.edit, color: Colors.orangeAccent, size: 20),
-          tooltip: 'Editar robô',
-          onPressed: () => _showEditarRoboDialog(robo),
-        ),
-        IconButton(
-          icon: const Icon(Icons.delete, color: Colors.redAccent, size: 20),
-          tooltip: 'Excluir robô',
-          onPressed: () => _confirmarExclusaoRobo(robo.id, robo.nome),
-        ),
-      ],
-    ),
-  ],
-),
 
-
-          // performance chips
+          // Performance chips
           if (robo.performance != null && robo.performance!.isNotEmpty) ...[
             const SizedBox(height: 12),
-            const Text(
-              'Performance:',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            const Text('Performance:',
+                style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
             const SizedBox(height: 4),
             Wrap(
               spacing: 8,
               runSpacing: 4,
-              children: robo.performance!
-                  .map(
-                    (perf) => Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF34a853).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        perf,
-                        style: const TextStyle(
-                          color: Color(0xFF34a853),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  )
-                  .toList(),
+              children: robo.performance!.map((perf) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34a853).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    perf,
+                    style: const TextStyle(color: Color(0xFF34a853), fontSize: 12, fontWeight: FontWeight.w500),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ],
@@ -409,14 +325,14 @@ Row(
     );
   }
 
-  // ========== D I Á L O G O   D E   C R I A Ç Ã O ==========
+  // ========== CRIAR ==========
   void _showCreateRoboDialog() {
     final _formKey = GlobalKey<FormState>();
     final _nomeController = TextEditingController();
-    final TextEditingController _performanceController = TextEditingController();
+    final _performanceController = TextEditingController();
     final List<String> _listaPerformance = [];
 
-    // dropdown de ativos
+    // Dropdown de ativos
     List<AtivoResumo> _ativos = [];
     AtivoResumo? _ativoSelecionado;
     bool _carregandoAtivos = true;
@@ -453,10 +369,7 @@ Row(
 
           return AlertDialog(
             backgroundColor: const Color(0xFF2d2d2d),
-            title: const Text(
-              'Criar Novo Robô',
-              style: TextStyle(color: Colors.white),
-            ),
+            title: const Text('Criar Novo Robô', style: TextStyle(color: Colors.white)),
             content: SizedBox(
               width: 420,
               child: Form(
@@ -471,51 +384,35 @@ Row(
                       decoration: const InputDecoration(
                         labelText: 'Nome do Robô',
                         labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF4285f4)),
-                        ),
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                        focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF4285f4))),
                       ),
-                      validator: (value) =>
-                          (value == null || value.isEmpty)
-                              ? 'Nome é obrigatório'
-                              : null,
+                      validator: (value) => (value == null || value.isEmpty) ? 'Nome é obrigatório' : null,
                     ),
                     const SizedBox(height: 16),
 
-                    // Dropdown de Ativos (substitui Symbol)
+                    // Ativo (descrição)
                     _carregandoAtivos
                         ? const LinearProgressIndicator()
                         : DropdownButtonFormField<AtivoResumo>(
                             value: _ativoSelecionado,
                             items: _ativos
-                                .map((a) => DropdownMenuItem(
-                                      value: a,
-                                      child: Text(a.descricao),
-                                    ))
+                                .map((a) => DropdownMenuItem(value: a, child: Text(a.descricao)))
                                 .toList(),
-                            onChanged: (v) =>
-                                setDialogState(() => _ativoSelecionado = v),
+                            onChanged: (v) => setDialogState(() => _ativoSelecionado = v),
                             decoration: const InputDecoration(
                               labelText: 'Ativo (descrição)',
                               labelStyle: TextStyle(color: Colors.white70),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white30),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xFF4285f4)),
-                              ),
+                              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF4285f4))),
                             ),
-                            validator: (v) =>
-                                v == null ? 'Selecione um ativo' : null,
+                            validator: (v) => v == null ? 'Selecione um ativo' : null,
                             dropdownColor: const Color(0xFF2d2d2d),
                             style: const TextStyle(color: Colors.white),
                           ),
                     const SizedBox(height: 16),
 
-                    // Performance + chips
+                    // Performance
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -527,18 +424,12 @@ Row(
                             labelStyle: const TextStyle(color: Colors.white70),
                             hintText: 'Digite e clique no +',
                             hintStyle: const TextStyle(color: Colors.white30),
-                            enabledBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white30),
-                            ),
-                            focusedBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xFF4285f4)),
-                            ),
+                            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                            focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF4285f4))),
                             suffixIcon: IconButton(
-                              icon: const Icon(Icons.add,
-                                  color: Color(0xFF4285f4)),
+                              icon: const Icon(Icons.add, color: Color(0xFF4285f4)),
                               onPressed: () {
-                                final texto =
-                                    _performanceController.text.trim();
+                                final texto = _performanceController.text.trim();
                                 if (texto.isNotEmpty) {
                                   setDialogState(() {
                                     _listaPerformance.add(texto);
@@ -552,21 +443,17 @@ Row(
                         const SizedBox(height: 8),
                         Wrap(
                           spacing: 8,
-                          children: _listaPerformance.map((item) {
-                            return Chip(
-                              label: Text(item),
-                              backgroundColor: Colors.green.withOpacity(0.2),
-                              labelStyle:
-                                  const TextStyle(color: Colors.green),
-                              deleteIcon:
-                                  const Icon(Icons.close, size: 18),
-                              onDeleted: () {
-                                setDialogState(() {
-                                  _listaPerformance.remove(item);
-                                });
-                              },
-                            );
-                          }).toList(),
+                          children: _listaPerformance
+                              .map((item) => Chip(
+                                    label: Text(item),
+                                    backgroundColor: Colors.green.withOpacity(0.2),
+                                    labelStyle: const TextStyle(color: Colors.green),
+                                    deleteIcon: const Icon(Icons.close, size: 18),
+                                    onDeleted: () {
+                                      setDialogState(() => _listaPerformance.remove(item));
+                                    },
+                                  ))
+                              .toList(),
                         ),
                       ],
                     ),
@@ -575,13 +462,8 @@ Row(
                     // Arquivo do Robô
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Arquivo do Robô',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: Text('Arquivo do Robô',
+                          style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 8),
                     Container(
@@ -597,26 +479,20 @@ Row(
                             _selectedPlatformFile != null
                                 ? 'Arquivo: ${_selectedPlatformFile!.name}'
                                 : 'Nenhum arquivo selecionado',
-                            style:
-                                const TextStyle(color: Colors.white70),
+                            style: const TextStyle(color: Colors.white70),
                           ),
                           const SizedBox(height: 8),
                           ElevatedButton(
                             onPressed: () async {
-                              final result = await FilePicker.platform
-                                  .pickFiles(withData: true);
+                              final result = await FilePicker.platform.pickFiles(withData: true);
                               if (result != null) {
                                 setDialogState(() {
-                                  _selectedPlatformFile =
-                                      result.files.first;
-                                  _fileBytes =
-                                      result.files.first.bytes;
+                                  _selectedPlatformFile = result.files.first;
+                                  _fileBytes = result.files.first.bytes;
                                 });
                               }
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4285f4),
-                            ),
+                            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4285f4)),
                             child: const Text('Selecionar Arquivo'),
                           ),
                         ],
@@ -628,10 +504,8 @@ Row(
             ),
             actions: [
               TextButton(
-                onPressed:
-                    _isCreating ? null : () => Navigator.pop(context),
-                child: const Text('Cancelar',
-                    style: TextStyle(color: Colors.white70)),
+                onPressed: _isCreating ? null : () => Navigator.pop(context),
+                child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
               ),
               ElevatedButton(
                 onPressed: _isCreating
@@ -643,8 +517,7 @@ Row(
                           if (_listaPerformance.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text(
-                                    'Adicione pelo menos uma performance'),
+                                content: Text('Adicione pelo menos uma performance'),
                                 backgroundColor: Colors.orange,
                               ),
                             );
@@ -655,10 +528,9 @@ Row(
 
                           try {
                             final nome = _nomeController.text.trim();
-                            final idAtivo = _ativoSelecionado!.id; // int
+                            final idAtivo = _ativoSelecionado!.id;
                             final performance = _listaPerformance;
 
-                            // === criar robô (agora com id_ativo) ===
                             await _roboService.criarRobo(
                               nome: nome,
                               idAtivo: idAtivo,
@@ -667,15 +539,11 @@ Row(
                               arquivoBytes: _fileBytes,
                             );
 
-                            // === fluxos já existentes ===
+                            // Fluxo existente
                             final aplicacao =
-                                await _aplicacaoService.criarAplicacao(
-                              nome: 'robo $nome',
-                              tipo: 'backend',
-                            );
+                                await _aplicacaoService.criarAplicacao(nome: 'robo $nome', tipo: 'backend');
 
-                            final versao = await _versaoAplicacaoService
-                                .criarVersaoAplicacao(
+                            final versao = await _versaoAplicacaoService.criarVersaoAplicacao(
                               descricao: 'versao 1 do robo $nome',
                               arquivo: _selectedPlatformFile!,
                               idAplicacao: aplicacao.id,
@@ -691,41 +559,30 @@ Row(
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content:
-                                    Text('Robô criado com sucesso!'),
+                                content: Text('Robô criado com sucesso!'),
                                 backgroundColor: Color(0xFF34a853),
                               ),
                             );
                           } catch (e) {
                             setDialogState(() => _isCreating = false);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    'Erro ao criar robô e aplicações: $e'),
-                                backgroundColor: Colors.red,
-                              ),
+                              SnackBar(content: Text('Erro ao criar robô e aplicações: $e'), backgroundColor: Colors.red),
                             );
                           }
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Selecione um arquivo'),
-                              backgroundColor: Colors.orange,
-                            ),
+                            const SnackBar(content: Text('Selecione um arquivo'), backgroundColor: Colors.orange),
                           );
                         }
                       },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4285f4),
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4285f4)),
                 child: _isCreating
                     ? const SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Text('Criar'),
@@ -737,19 +594,16 @@ Row(
     );
   }
 
-  // ========== D I Á L O G O   D E   E D I Ç Ã O ==========
+  // ========== EDITAR ==========
   void _showEditarRoboDialog(Robo robo) {
     final _formKey = GlobalKey<FormState>();
-    final TextEditingController _nomeController =
-        TextEditingController(text: robo.nome);
-    final TextEditingController _performanceController =
-        TextEditingController();
-    final List<String> _listaPerformance =
-        List<String>.from(robo.performance ?? []);
+    final _nomeController = TextEditingController(text: robo.nome);
+    final _performanceController = TextEditingController();
+    final List<String> _listaPerformance = List<String>.from(robo.performance ?? []);
 
-    // dropdown de ativos
+    // Dropdown de ativos
     List<AtivoResumo> _ativos = [];
-    AtivoResumo? _ativoSelecionado; // opcional — usuário escolhe se quiser alterar
+    AtivoResumo? _ativoSelecionado; // opcional
     bool _carregandoAtivos = true;
 
     PlatformFile? _selectedPlatformFile;
@@ -786,8 +640,7 @@ Row(
 
           return AlertDialog(
             backgroundColor: const Color(0xFF2d2d2d),
-            title: Text('Editar ${robo.nome}',
-                style: const TextStyle(color: Colors.white)),
+            title: Text('Editar ${robo.nome}', style: const TextStyle(color: Colors.white)),
             content: SizedBox(
               width: 420,
               child: Form(
@@ -802,29 +655,20 @@ Row(
                       decoration: const InputDecoration(
                         labelText: 'Nome do Robô',
                         labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF4285f4)),
-                        ),
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                        focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF4285f4))),
                       ),
-                      validator: (value) => (value == null || value.isEmpty)
-                          ? 'Nome é obrigatório'
-                          : null,
+                      validator: (value) => (value == null || value.isEmpty) ? 'Nome é obrigatório' : null,
                     ),
                     const SizedBox(height: 16),
 
-                    // Dropdown de Ativos (opcional no editar)
+                    // Ativo (opcional)
                     _carregandoAtivos
                         ? const LinearProgressIndicator()
                         : DropdownButtonFormField<AtivoResumo>(
                             value: _ativoSelecionado,
                             items: _ativos
-                                .map((a) => DropdownMenuItem(
-                                      value: a,
-                                      child: Text(a.descricao),
-                                    ))
+                                .map((a) => DropdownMenuItem(value: a, child: Text(a.descricao)))
                                 .toList(),
                             onChanged: (v) {
                               setDialogState(() {
@@ -835,19 +679,15 @@ Row(
                             decoration: const InputDecoration(
                               labelText: 'Ativo (descrição)',
                               labelStyle: TextStyle(color: Colors.white70),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white30),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Color(0xFF4285f4)),
-                              ),
+                              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF4285f4))),
                             ),
                             dropdownColor: const Color(0xFF2d2d2d),
                             style: const TextStyle(color: Colors.white),
                           ),
                     const SizedBox(height: 16),
 
-                    // Performance com botão de adicionar/remover
+                    // Performance
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -859,18 +699,12 @@ Row(
                             labelStyle: const TextStyle(color: Colors.white70),
                             hintText: 'Digite e clique no +',
                             hintStyle: const TextStyle(color: Colors.white30),
-                            enabledBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white30),
-                            ),
-                            focusedBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xFF4285f4)),
-                            ),
+                            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                            focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF4285f4))),
                             suffixIcon: IconButton(
-                              icon: const Icon(Icons.add,
-                                  color: Color(0xFF4285f4)),
+                              icon: const Icon(Icons.add, color: Color(0xFF4285f4)),
                               onPressed: () {
-                                final texto =
-                                    _performanceController.text.trim();
+                                final texto = _performanceController.text.trim();
                                 if (texto.isNotEmpty) {
                                   setDialogState(() {
                                     _listaPerformance.add(texto);
@@ -885,37 +719,30 @@ Row(
                         const SizedBox(height: 8),
                         Wrap(
                           spacing: 8,
-                          children: _listaPerformance.map((item) {
-                            return Chip(
-                              label: Text(item),
-                              backgroundColor: Colors.green.withOpacity(0.2),
-                              labelStyle:
-                                  const TextStyle(color: Colors.green),
-                              deleteIcon:
-                                  const Icon(Icons.close, size: 18),
-                              onDeleted: () {
-                                setDialogState(() {
-                                  _listaPerformance.remove(item);
-                                  _performanceAlterada = true;
-                                });
-                              },
-                            );
-                          }).toList(),
+                          children: _listaPerformance
+                              .map((item) => Chip(
+                                    label: Text(item),
+                                    backgroundColor: Colors.green.withOpacity(0.2),
+                                    labelStyle: const TextStyle(color: Colors.green),
+                                    deleteIcon: const Icon(Icons.close, size: 18),
+                                    onDeleted: () {
+                                      setDialogState(() {
+                                        _listaPerformance.remove(item);
+                                        _performanceAlterada = true;
+                                      });
+                                    },
+                                  ))
+                              .toList(),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
 
-                    // Arquivo com botão de remoção
+                    // Arquivo
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Arquivo do Robô',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: Text('Arquivo do Robô',
+                          style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 8),
                     Container(
@@ -931,8 +758,7 @@ Row(
                             _selectedPlatformFile != null
                                 ? 'Arquivo: ${_selectedPlatformFile!.name}'
                                 : 'Nenhum arquivo selecionado',
-                            style:
-                                const TextStyle(color: Colors.white70),
+                            style: const TextStyle(color: Colors.white70),
                           ),
                           const SizedBox(height: 8),
                           Row(
@@ -940,34 +766,25 @@ Row(
                             children: [
                               ElevatedButton(
                                 onPressed: () async {
-                                  final result = await FilePicker.platform
-                                      .pickFiles(withData: true);
+                                  final result = await FilePicker.platform.pickFiles(withData: true);
                                   if (result != null) {
                                     setDialogState(() {
-                                      _selectedPlatformFile =
-                                          result.files.first;
-                                      _fileBytes =
-                                          result.files.first.bytes;
+                                      _selectedPlatformFile = result.files.first;
+                                      _fileBytes = result.files.first.bytes;
                                     });
                                   }
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      const Color(0xFF4285f4),
-                                ),
+                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4285f4)),
                                 child: const Text('Selecionar Arquivo'),
                               ),
                               if (_selectedPlatformFile != null) ...[
                                 const SizedBox(width: 8),
                                 IconButton(
-                                  icon: const Icon(Icons.delete,
-                                      color: Colors.redAccent),
-                                  onPressed: () {
-                                    setDialogState(() {
-                                      _selectedPlatformFile = null;
-                                      _fileBytes = null;
-                                    });
-                                  },
+                                  icon: const Icon(Icons.delete, color: Colors.redAccent),
+                                  onPressed: () => setDialogState(() {
+                                    _selectedPlatformFile = null;
+                                    _fileBytes = null;
+                                  }),
                                 ),
                               ],
                             ],
@@ -981,10 +798,8 @@ Row(
             ),
             actions: [
               TextButton(
-                onPressed:
-                    _isUpdating ? null : () => Navigator.pop(context),
-                child: const Text('Cancelar',
-                    style: TextStyle(color: Colors.white70)),
+                onPressed: _isUpdating ? null : () => Navigator.pop(context),
+                child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
               ),
               ElevatedButton(
                 onPressed: _isUpdating
@@ -992,19 +807,12 @@ Row(
                     : () async {
                         if (_formKey.currentState!.validate()) {
                           setDialogState(() => _isUpdating = true);
-
                           try {
                             await _roboService.editarRobo(
                               id: robo.id,
-                              nome: _nomeController.text.trim() == robo.nome
-                                  ? null
-                                  : _nomeController.text.trim(),
-                              // envia id_ativo apenas se o usuário trocou
-                              idAtivo:
-                                  _ativoAlterado ? _ativoSelecionado?.id : null,
-                              performance: _performanceAlterada
-                                  ? _listaPerformance
-                                  : null,
+                              nome: _nomeController.text.trim() == robo.nome ? null : _nomeController.text.trim(),
+                              idAtivo: _ativoAlterado ? _ativoSelecionado?.id : null,
+                              performance: _performanceAlterada ? _listaPerformance : null,
                               arquivoWeb: _selectedPlatformFile,
                               arquivoBytes: _fileBytes,
                             );
@@ -1014,34 +822,26 @@ Row(
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content:
-                                    Text('Robô atualizado com sucesso!'),
+                                content: Text('Robô atualizado com sucesso!'),
                                 backgroundColor: Color(0xFF34a853),
                               ),
                             );
                           } catch (e) {
                             setDialogState(() => _isUpdating = false);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content:
-                                    Text('Erro ao atualizar robô: $e'),
-                                backgroundColor: Colors.red,
-                              ),
+                              SnackBar(content: Text('Erro ao atualizar robô: $e'), backgroundColor: Colors.red),
                             );
                           }
                         }
                       },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4285f4),
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4285f4)),
                 child: _isUpdating
                     ? const SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Text('Confirmar'),
@@ -1053,49 +853,35 @@ Row(
     );
   }
 
-  // ======== Diálogos auxiliares já existentes ========
+  // ======== Auxiliares ========
   void _confirmarExclusaoRobo(int roboId, String nomeRobo) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF2d2d2d),
-        title: const Text(
-          'Confirmar Exclusão',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Confirmar Exclusão', style: TextStyle(color: Colors.white)),
         content: Text(
           'Deseja realmente excluir o robô "$nomeRobo"? Esta ação não poderá ser desfeita.',
           style: const TextStyle(color: Colors.white70),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar',
-                style: TextStyle(color: Colors.white70)),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar', style: TextStyle(color: Colors.white70))),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context); // fecha o dialog
+              Navigator.pop(context);
               try {
                 await _roboService.excluirRobo(roboId);
                 _loadRobos();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Robô excluído com sucesso.'),
-                    backgroundColor: Color(0xFF34a853),
-                  ),
+                  const SnackBar(content: Text('Robô excluído com sucesso.'), backgroundColor: Color(0xFF34a853)),
                 );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Erro ao excluir robô: $e'),
-                    backgroundColor: Colors.red,
-                  ),
+                  SnackBar(content: Text('Erro ao excluir robô: $e'), backgroundColor: Colors.red),
                 );
               }
             },
-            style:
-                ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             child: const Text('Excluir'),
           ),
         ],
@@ -1108,43 +894,25 @@ Row(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF2d2d2d),
-        title: const Text(
-          'Confirmar Download',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          'Deseja fazer o download do arquivo do robô "$nomeRobo"?',
-          style: const TextStyle(color: Colors.white70),
-        ),
+        title: const Text('Confirmar Download', style: TextStyle(color: Colors.white)),
+        content: Text('Deseja fazer o download do arquivo do robô "$nomeRobo"?',
+            style: const TextStyle(color: Colors.white70)),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar',
-                style: TextStyle(color: Colors.white70)),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar', style: TextStyle(color: Colors.white70))),
           ElevatedButton.icon(
             icon: const Icon(Icons.download, size: 18),
             label: const Text('Baixar'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4285f4),
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4285f4)),
             onPressed: () async {
               Navigator.pop(context);
-
               try {
                 await _roboService.baixarArquivo(roboId, nomeRobo);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Download iniciado.'),
-                    backgroundColor: Color(0xFF34a853),
-                  ),
+                  const SnackBar(content: Text('Download iniciado.'), backgroundColor: Color(0xFF34a853)),
                 );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Erro ao baixar: $e'),
-                    backgroundColor: Colors.red,
-                  ),
+                  SnackBar(content: Text('Erro ao baixar: $e'), backgroundColor: Colors.red),
                 );
               }
             },

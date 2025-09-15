@@ -574,21 +574,22 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
                           const SizedBox(height: 8),
                           ElevatedButton(
                             onPressed: () async {
-                              final result = await FilePicker.platform
-                                  .pickFiles(withData: true);
+                              final result = await FilePicker.platform.pickFiles(
+                                withData: true,
+                                type: FileType.custom,            // <<< apenas ZIP
+                                allowedExtensions: const ['zip'], // <<<
+                              );
                               if (result != null) {
                                 setDialogState(() {
-                                  _selectedPlatformFile =
-                                      result.files.first;
-                                  _fileBytes =
-                                      result.files.first.bytes;
+                                  _selectedPlatformFile = result.files.first;
+                                  _fileBytes = result.files.first.bytes;
                                 });
                               }
                             },
                             style: ElevatedButton.styleFrom(
                                 backgroundColor:
                                     const Color(0xFF4285f4)),
-                            child: const Text('Selecionar Arquivo'),
+                            child: const Text('Selecionar Arquivo (.zip)'),
                           ),
                         ],
                       ),
@@ -611,6 +612,20 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
                         if (_formKey.currentState!.validate() &&
                             _selectedPlatformFile != null &&
                             _fileBytes != null) {
+                          // valida extensão .zip
+                          final isZip = _selectedPlatformFile!.name
+                              .toLowerCase()
+                              .endsWith('.zip');
+                          if (!isZip) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Selecione um arquivo .zip'),
+                                backgroundColor: Colors.orange,
+                              ),
+                            );
+                            return;
+                          }
+
                           if (_listaPerformance.isEmpty) {
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(const SnackBar(
@@ -713,7 +728,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
 
     // usa o cache (sem animação)
     AtivoResumo? _ativoSelecionado;
-    // >>> Única alteração: pré-seleciona o ativo do robô <<<
+    // pré-seleciona o ativo do robô
     try {
       _ativoSelecionado =
           _ativosCache.firstWhere((a) => a.id == robo.idAtivo);
@@ -887,21 +902,22 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
                             children: [
                               ElevatedButton(
                                 onPressed: () async {
-                                  final result = await FilePicker.platform
-                                      .pickFiles(withData: true);
+                                  final result = await FilePicker.platform.pickFiles(
+                                    withData: true,
+                                    type: FileType.custom,            // <<< apenas ZIP
+                                    allowedExtensions: const ['zip'], // <<<
+                                  );
                                   if (result != null) {
                                     setDialogState(() {
-                                      _selectedPlatformFile =
-                                          result.files.first;
-                                      _fileBytes =
-                                          result.files.first.bytes;
+                                      _selectedPlatformFile = result.files.first;
+                                      _fileBytes = result.files.first.bytes;
                                     });
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor:
                                         const Color(0xFF4285f4)),
-                                child: const Text('Selecionar Arquivo'),
+                                child: const Text('Selecionar Arquivo (.zip)'),
                               ),
                               if (_selectedPlatformFile != null) ...[
                                 const SizedBox(width: 8),
@@ -937,10 +953,26 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
                         if (_formKey.currentState!.validate()) {
                           setDialogState(() => _isUpdating = true);
                           try {
+                            // se houver arquivo, precisa ser .zip
+                            if (_selectedPlatformFile != null) {
+                              final isZip = _selectedPlatformFile!.name
+                                  .toLowerCase()
+                                  .endsWith('.zip');
+                              if (!isZip) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Selecione um arquivo .zip'),
+                                    backgroundColor: Colors.orange,
+                                  ),
+                                );
+                                setDialogState(() => _isUpdating = false);
+                                return;
+                              }
+                            }
+
                             await _roboService.editarRobo(
                               id: robo.id,
-                              nome: _nomeController.text.trim() ==
-                                      robo.nome
+                              nome: _nomeController.text.trim() == robo.nome
                                   ? null
                                   : _nomeController.text.trim(),
                               idAtivo: _ativoAlterado

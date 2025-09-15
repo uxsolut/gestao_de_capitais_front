@@ -99,7 +99,8 @@ class RoboService {
         arquivo = MultipartFile.fromBytes(
           arquivoBytes,
           filename: arquivoWeb.name,
-          contentType: MediaType('application', 'octet-stream'),
+          // zip obrigatório
+          contentType: MediaType('application', 'zip'),
         );
       } else {
         if (arquivoMobile == null) {
@@ -108,6 +109,7 @@ class RoboService {
         arquivo = await MultipartFile.fromFile(
           arquivoMobile.path,
           filename: arquivoMobile.path.split('/').last,
+          contentType: MediaType('application', 'zip'),
         );
       }
       formData.files.add(MapEntry('arquivo_robo', arquivo));
@@ -165,13 +167,14 @@ class RoboService {
         final mf = MultipartFile.fromBytes(
           arquivoBytes,
           filename: arquivoWeb.name,
-          contentType: MediaType('application', 'octet-stream'),
+          contentType: MediaType('application', 'zip'),
         );
         formData.files.add(MapEntry('arquivo_robo', mf));
       } else if (!kIsWeb && arquivoMobile != null) {
         final mf = await MultipartFile.fromFile(
           arquivoMobile.path,
           filename: arquivoMobile.path.split('/').last,
+          contentType: MediaType('application', 'zip'),
         );
         formData.files.add(MapEntry('arquivo_robo', mf));
       }
@@ -219,10 +222,11 @@ class RoboService {
 
       if (response.statusCode == 200) {
         final safe = _sanitizeFileName(nomeRobo);
-        final fileName = 'arquivo_${safe}.ex5';
+        // sempre .zip
+        final fileName = '${safe}.zip';
 
         // Web: dispara download
-        final blob = html.Blob([response.bodyBytes]);
+        final blob = html.Blob([response.bodyBytes], 'application/zip');
         final urlDownload = html.Url.createObjectUrlFromBlob(blob);
         html.AnchorElement(href: urlDownload)
           ..setAttribute('download', fileName)

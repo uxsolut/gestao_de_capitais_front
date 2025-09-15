@@ -713,6 +713,13 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
 
     // usa o cache (sem animação)
     AtivoResumo? _ativoSelecionado;
+    // >>> Única alteração: pré-seleciona o ativo do robô <<<
+    try {
+      _ativoSelecionado =
+          _ativosCache.firstWhere((a) => a.id == robo.idAtivo);
+    } catch (_) {
+      _ativoSelecionado = null;
+    }
 
     PlatformFile? _selectedPlatformFile;
     Uint8List? _fileBytes;

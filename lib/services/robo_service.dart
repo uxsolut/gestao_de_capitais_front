@@ -217,22 +217,47 @@ class RoboService {
       final token = await _httpService.getToken();
       if (token == null) throw Exception('Token não encontrado');
 
-      final url = Uri.parse('${ApiConfig.baseUrl}/robos/download/$roboId');
-      final response = await http.get(url, headers: {'Authorization': 'Bearer $token'});
+      // Usamos Dio para garantir bytes + ler Content-Disposition
+      final dio = Dio()
+        ..options.headers['Authorization'] = 'Bearer $token';
 
-      if (response.statusCode == 200) {
+      final response = await dio.get<List<int>>(
+        '${ApiConfig.baseUrl}/robos/download/$roboId',
+        options: Options(
+          responseType: ResponseType.bytes,
+          followRedirects: false,
+          validateStatus: (s) => s != null && s < 500,
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        // tenta pegar o nome real do header; fallback para nome do robô
+        final cd = response.headers.value('content-disposition');
+        final fromHeader = _extractFileName(cd);
         final safe = _sanitizeFileName(nomeRobo);
-        // sempre .zip
-        final fileName = '${safe}.zip';
+        final fileName = (fromHeader?.isNotEmpty == true)
+            ? fromHeader!
+            : '$safe.zip'; // sempre .zip conforme combinado
 
-        // Web: dispara download
-        final blob = html.Blob([response.bodyBytes], 'application/zip');
-        final urlDownload = html.Url.createObjectUrlFromBlob(blob);
-        html.AnchorElement(href: urlDownload)
-          ..setAttribute('download', fileName)
-          ..click();
-        html.Url.revokeObjectUrl(urlDownload);
+        if (kIsWeb) {
+          final blob = html.Blob([response.data!], 'application/zip');
+          final urlDownload = html.Url.createObjectUrlFromBlob(blob);
+
+          // adiciona âncora ao DOM para melhor compatibilidade (Safari/Edge)
+          final anchor = html.AnchorElement(href: urlDownload)
+            ..download = fileName
+            ..style.display = 'none';
+          html.document.body?.append(anchor);
+          anchor.click();
+          anchor.remove();
+
+          html.Url.revokeObjectUrl(urlDownload);
+        } else {
+          // Se precisar suportar mobile/desktop, implementar salvamento local aqui.
+          throw Exception('Download local não implementado fora do Web.');
+        }
       } else if (response.statusCode == 401) {
+        _httpService.handleTokenExpired();
         throw Exception('Não autorizado. Faça login novamente.');
       } else {
         throw Exception('Erro ao baixar arquivo: ${response.statusCode}');
@@ -240,6 +265,23 @@ class RoboService {
     } catch (e) {
       rethrow;
     }
+  }
+
+  // Extrai filename do header Content-Disposition (se vier)
+  String? _extractFileName(String? contentDisposition) {
+    if (contentDisposition == null) return null;
+    final reg = RegExp(r'filename\*?=([^;]+)$', caseSensitive: false);
+    final m = reg.firstMatch(contentDisposition);
+    if (m == null) return null;
+
+    var v = m.group(1)!.trim();
+    if (v.startsWith("UTF-8''")) {
+      v = Uri.decodeFull(v.substring(7));
+    }
+    if (v.startsWith('"') && v.endsWith('"')) {
+      v = v.substring(1, v.length - 1);
+    }
+    return v;
   }
 
   String _sanitizeFileName(String input) {

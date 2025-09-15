@@ -1,12 +1,15 @@
 class RoboModel {
   final int id;
   final String nome;
-  final String symbol; // se existir
-  final DateTime? criadoEm; // se for usado no backend
+  final String symbol; // manter compatibilidade, se não usar pode ficar vazio
+  final DateTime? criadoEm;
   final List<String>? performance;
 
-  // >>> adição mínima: idAtivo opcional <<<
+  /// novo: para preencher o dropdown no editar
   final int? idAtivo;
+
+  /// opcional: útil se quiser desabilitar download quando não existir
+  final bool? temArquivo;
 
   RoboModel({
     required this.id,
@@ -14,7 +17,8 @@ class RoboModel {
     required this.symbol,
     this.criadoEm,
     this.performance,
-    this.idAtivo, // novo
+    this.idAtivo,
+    this.temArquivo,
   });
 
   factory RoboModel.fromJson(Map<String, dynamic> json) {
@@ -24,8 +28,8 @@ class RoboModel {
       symbol: json['symbol'] ?? '',
       criadoEm: json['criado_em'] != null ? DateTime.parse(json['criado_em']) : null,
       performance: (json['performance'] as List?)?.map((e) => e.toString()).toList(),
-      // >>> novo: lê do backend (id_ativo) quando vier <<<
-      idAtivo: json['id_ativo'] is int ? json['id_ativo'] as int : null,
+      idAtivo: json['id_ativo'],
+      temArquivo: json['tem_arquivo'],
     );
   }
 
@@ -36,8 +40,8 @@ class RoboModel {
       'symbol': symbol,
       'criado_em': criadoEm?.toIso8601String(),
       'performance': performance,
-      // >>> mantém compat: envia id_ativo se existir <<<
       'id_ativo': idAtivo,
+      'tem_arquivo': temArquivo,
     };
   }
 }

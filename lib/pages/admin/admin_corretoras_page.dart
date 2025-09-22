@@ -10,414 +10,590 @@ class AdminCorretorasPage extends StatefulWidget {
   State<AdminCorretorasPage> createState() => _AdminCorretorasPageState();
 }
 
-class _AdminCorretorasPageState extends State<AdminCorretorasPage> with TickerProviderStateMixin {
+class _AdminCorretorasPageState extends State<AdminCorretorasPage>
+    with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+
+  final CorretoraService _service = CorretoraService();
+
   List<Corretora> _corretoras = [];
   bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _fadeAnimation =
+        CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut);
+    _fadeController.forward();
+
     _carregarCorretoras();
   }
 
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
+
+  bool _isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < 768;
+
   Future<void> _carregarCorretoras() async {
-    setState(() => _isLoading = true);
-    try {
-      final lista = await CorretoraService().listarCorretoras();
-      setState(() => _corretoras = lista);
-    } catch (e) {
-      // erro silencioso
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  void _mostrarDialogCriarCorretora() {
-    final nomeController = TextEditingController();
-    final cnpjController = TextEditingController();
-    final telefoneController = TextEditingController();
-    final emailController = TextEditingController();
-    bool isLoading = false;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-              backgroundColor: const Color(0xFF1E1E1E),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Center(
-                        child: Text(
-                          'Criar Nova Corretora',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      _campoInput('Nome da Corretora', nomeController),
-                      const SizedBox(height: 12),
-                      _campoInput('CNPJ', cnpjController),
-                      const SizedBox(height: 12),
-                      _campoInput('Telefone', telefoneController),
-                      const SizedBox(height: 12),
-                      _campoInput('Email', emailController),
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
-                          ),
-                          const SizedBox(width: 12),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4285F4),
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: isLoading
-                                ? null
-                                : () async {
-                                    setState(() => isLoading = true);
-                                    await CorretoraService().criarCorretora(
-                                      CorretoraCreate(
-                                        nome: nomeController.text,
-                                        cnpj: cnpjController.text,
-                                        telefone: telefoneController.text,
-                                        email: emailController.text,
-                                      ),
-                                    );
-                                    Navigator.pop(context, true);
-                                  },
-                            child: const Text('Criar', style: TextStyle(color: Colors.white)),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    ).then((criado) {
-      if (criado == true) _carregarCorretoras();
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
     });
-  }
-
-  Widget _campoInput(String label, TextEditingController controller) {
-    return TextField(
-      controller: controller,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white70),
-        filled: true,
-        fillColor: const Color(0xFF2C2C2C),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.transparent),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF4285F4)),
-        ),
-      ),
-    );
+    try {
+      final lista = await _service.listarCorretoras();
+      setState(() {
+        _corretoras = lista;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = _isMobile(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a1a),
-      appBar: null,
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 100),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Corretoras",
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                        const TopoFixo(),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2b2b2b),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-    const Text(
-      'Corretoras',
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-    Text(
-      'Total: ${_corretoras.length} corretoras',
-      style: const TextStyle(
-        color: Colors.white70,
-        fontSize: 14,
-      ),
-    ),
-  ],
-),
-
-                        const SizedBox(height: 12),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _corretoras.length,
-                          itemBuilder: (context, index) {
-                            final corretora = _corretoras[index];
-                            return Container(
-                              margin: const EdgeInsets.symmetric(vertical: 8),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1a1a1a),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: const Color(0xFF2C66C3), // Azul mais escuro
-                                  width: 1,
-                                ),
-                              ),
-                              child: Column(
-  crossAxisAlignment: CrossAxisAlignment.stretch,
-  children: [
-    Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-    Expanded(
-      child: Text(
-        corretora.nome,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    ),
-    Row(
-      children: [
-        IconButton(
-          icon: const Icon(Icons.edit, size: 20, color: Colors.orangeAccent),
-          tooltip: 'Editar',
-          onPressed: () => _abrirDialogEditarCorretora(corretora),
-        ),
-        IconButton(
-          icon: const Icon(Icons.delete, size: 20, color: Colors.redAccent),
-          tooltip: 'Excluir',
-          onPressed: () => _confirmarExclusaoCorretora(corretora.id),
-        ),
-      ],
-    ),
-  ],
-),
-
-    const SizedBox(height: 6),
-    Row(
-      children: [
-        const Icon(Icons.email, size: 16, color: Colors.white70),
-        const SizedBox(width: 6),
-        Text(
-          corretora.email ?? 'sem email',
-          style: const TextStyle(color: Colors.white70, fontSize: 14),
-        ),
-      ],
-    ),
-    if (corretora.telefone != null && corretora.telefone!.isNotEmpty)
-      Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Row(
-          children: [
-            const Icon(Icons.phone, size: 16, color: Colors.white70),
-            const SizedBox(width: 6),
-            Text(
-              corretora.telefone!,
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Padding(
+            padding: EdgeInsets.all(isMobile ? 12.0 : 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(isMobile),
+                SizedBox(height: isMobile ? 16 : 24),
+                Expanded(child: _buildContent(isMobile)),
+              ],
             ),
-          ],
+          ),
         ),
       ),
-    if (corretora.cnpj != null && corretora.cnpj!.isNotEmpty)
-      Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Row(
-          children: [
-            const Icon(Icons.badge, size: 16, color: Colors.white70),
-            const SizedBox(width: 6),
-            Text(
-              corretora.cnpj!,
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-          ],
-        ),
-      ),
-  ],
-),
-
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
+        onPressed: _showCreateCorretoraDialog,
+        backgroundColor: const Color(0xFF4285f4),
         child: const Icon(Icons.add),
-        onPressed: _mostrarDialogCriarCorretora,
       ),
     );
   }
-  void _abrirDialogEditarCorretora(Corretora corretora) {
-  final nomeController = TextEditingController(text: corretora.nome);
-  final cnpjController = TextEditingController(text: corretora.cnpj ?? '');
-  final telefoneController = TextEditingController(text: corretora.telefone ?? '');
-  final emailController = TextEditingController(text: corretora.email ?? '');
-  bool isLoading = false;
 
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-            backgroundColor: const Color(0xFF1E1E1E),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
+  Widget _buildHeader(bool isMobile) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Corretoras',
+              style: TextStyle(
+                fontSize: isMobile ? 20 : 24,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        const TopoFixo(),
+      ],
+    );
+  }
+
+  Widget _buildContent(bool isMobile) {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4285f4)),
+        ),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline,
+                size: 64, color: Colors.red.withOpacity(0.7)),
+            const SizedBox(height: 16),
+            Text(
+              'Erro ao carregar corretoras',
+              style: TextStyle(
+                fontSize: isMobile ? 16 : 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _errorMessage!,
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _carregarCorretoras,
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4285f4)),
+              child: const Text('Tentar Novamente'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_corretoras.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.apartment_outlined,
+                size: 64, color: Colors.white.withOpacity(0.5)),
+            const SizedBox(height: 16),
+            Text(
+              'Nenhuma corretora cadastrada',
+              style: TextStyle(
+                fontSize: isMobile ? 16 : 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Use o botão + para criar a primeira corretora',
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SingleChildScrollView(child: _buildCorretorasList(isMobile));
+  }
+
+  Widget _buildCorretorasList(bool isMobile) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF2d2d2d),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.all(isMobile ? 16 : 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Corretoras (${_corretoras.length})',
+                  style: TextStyle(
+                    fontSize: isMobile ? 16 : 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  'Total: ${_corretoras.length} corretora${_corretoras.length != 1 ? 's' : ''}',
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+          ..._corretoras.map((c) => _buildCorretoraItem(c, isMobile)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCorretoraItem(Corretora c, bool isMobile) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 20, vertical: 8),
+      padding: EdgeInsets.all(isMobile ? 16 : 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1a1a1a),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: const Color(0xFF4285f4).withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Cabeçalho (nome + ações)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Nome
+              Expanded(
+                child: Text(
+                  c.nome,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              // Ações
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit,
+                        color: Colors.orangeAccent, size: 20),
+                    tooltip: 'Editar corretora',
+                    onPressed: () => _showEditarCorretoraDialog(c),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete,
+                        color: Colors.redAccent, size: 20),
+                    tooltip: 'Excluir corretora',
+                    onPressed: () => _confirmarExclusaoCorretora(c.id, c.nome),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Linhas de detalhes (seguindo tipografia da página de estratégias)
+          if ((c.email ?? '').isNotEmpty) _linhaInfo(Icons.email, c.email!),
+          if ((c.telefone ?? '').isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: _linhaInfo(Icons.phone, c.telefone!),
+            ),
+          if ((c.cnpj ?? '').isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: _linhaInfo(Icons.badge, c.cnpj!),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _linhaInfo(IconData icone, String texto) {
+    return Row(
+      children: [
+        Icon(icone, size: 16, color: Colors.white70),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            texto,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // =========================
+  // Dialog: CRIAR
+  // =========================
+  void _showCreateCorretoraDialog() {
+    final _formKey = GlobalKey<FormState>();
+    final _nome = TextEditingController();
+    final _cnpj = TextEditingController();
+    final _telefone = TextEditingController();
+    final _email = TextEditingController();
+    bool _isCreating = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF2d2d2d),
+            title: const Text('Criar Nova Corretora',
+                style: TextStyle(color: Colors.white)),
+            content: SizedBox(
+              width: 420,
+              child: Form(
+                key: _formKey,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Center(
-                      child: Text(
-                        'Editar Corretora',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
+                    _inputOutlined(
+                      controller: _nome,
+                      label: 'Nome da Corretora',
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
                     ),
-                    const SizedBox(height: 20),
-                    _campoInput('Nome da Corretora', nomeController),
-                    const SizedBox(height: 12),
-                    _campoInput('CNPJ', cnpjController),
-                    const SizedBox(height: 12),
-                    _campoInput('Telefone', telefoneController),
-                    const SizedBox(height: 12),
-                    _campoInput('Email', emailController),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
-                        ),
-                        const SizedBox(width: 12),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4285F4),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                          onPressed: isLoading
-                              ? null
-                              : () async {
-                                  setState(() => isLoading = true);
-                                  await CorretoraService().editarCorretora(
-                                    corretora.id,
-                                    CorretoraCreate(
-                                      nome: nomeController.text,
-                                      cnpj: cnpjController.text,
-                                      telefone: telefoneController.text,
-                                      email: emailController.text,
-                                    ),
-                                  );
-                                  Navigator.pop(context, true);
-                                },
-                          child: const Text('Salvar', style: TextStyle(color: Colors.white)),
-                        ),
-                      ],
-                    ),
+                    const SizedBox(height: 16),
+                    _inputOutlined(controller: _cnpj, label: 'CNPJ'),
+                    const SizedBox(height: 16),
+                    _inputOutlined(controller: _telefone, label: 'Telefone'),
+                    const SizedBox(height: 16),
+                    _inputOutlined(controller: _email, label: 'Email'),
                   ],
                 ),
               ),
             ),
+            actions: [
+              TextButton(
+                onPressed: _isCreating ? null : () => Navigator.pop(context),
+                child: const Text('Cancelar',
+                    style: TextStyle(color: Colors.white70)),
+              ),
+              ElevatedButton(
+                onPressed: _isCreating
+                    ? null
+                    : () async {
+                        if (!_formKey.currentState!.validate()) return;
+                        setDialogState(() => _isCreating = true);
+                        try {
+                          await _service.criarCorretora(CorretoraCreate(
+                            nome: _nome.text.trim(),
+                            cnpj: _cnpj.text.trim(),
+                            telefone: _telefone.text.trim(),
+                            email: _email.text.trim(),
+                          ));
+                          Navigator.pop(context);
+                          _carregarCorretoras();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Corretora criada com sucesso!'),
+                              backgroundColor: Color(0xFF34a853),
+                            ),
+                          );
+                        } catch (e) {
+                          setDialogState(() => _isCreating = false);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Erro ao criar corretora: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4285f4)),
+                child: _isCreating
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text('Criar'),
+              ),
+            ],
           );
         },
-      );
-    },
-  ).then((editado) {
-    if (editado == true) _carregarCorretoras();
-  });
-}
-void _confirmarExclusaoCorretora(int id) {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        backgroundColor: const Color(0xFF2C2C2C),
-        title: const Text(
-          'Excluir Corretora',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Tem certeza que deseja excluir esta corretora?',
-          style: TextStyle(color: Colors.white70),
+      ),
+    );
+  }
+
+  // =========================
+  // Dialog: EDITAR
+  // =========================
+  void _showEditarCorretoraDialog(Corretora c) {
+    final _formKey = GlobalKey<FormState>();
+    final _nome = TextEditingController(text: c.nome);
+    final _cnpj = TextEditingController(text: c.cnpj ?? '');
+    final _telefone = TextEditingController(text: c.telefone ?? '');
+    final _email = TextEditingController(text: c.email ?? '');
+    bool _isUpdating = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF2d2d2d),
+            title: Text('Editar ${c.nome}',
+                style: const TextStyle(color: Colors.white)),
+            content: SizedBox(
+              width: 420,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _inputOutlined(
+                      controller: _nome,
+                      label: 'Nome da Corretora',
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty) ? 'Obrigatório' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    _inputOutlined(controller: _cnpj, label: 'CNPJ'),
+                    const SizedBox(height: 16),
+                    _inputOutlined(controller: _telefone, label: 'Telefone'),
+                    const SizedBox(height: 16),
+                    _inputOutlined(controller: _email, label: 'Email'),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: _isUpdating ? null : () => Navigator.pop(context),
+                child: const Text('Cancelar',
+                    style: TextStyle(color: Colors.white70)),
+              ),
+              ElevatedButton(
+                onPressed: _isUpdating
+                    ? null
+                    : () async {
+                        if (!_formKey.currentState!.validate()) return;
+                        setDialogState(() => _isUpdating = true);
+                        try {
+                          await _service.editarCorretora(
+                            c.id,
+                            CorretoraCreate(
+                              nome: _nome.text.trim(),
+                              cnpj: _cnpj.text.trim(),
+                              telefone: _telefone.text.trim(),
+                              email: _email.text.trim(),
+                            ),
+                          );
+                          Navigator.pop(context);
+                          _carregarCorretoras();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Corretora atualizada!'),
+                              backgroundColor: Color(0xFF34a853),
+                            ),
+                          );
+                        } catch (e) {
+                          setDialogState(() => _isUpdating = false);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Erro ao atualizar: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4285f4)),
+                child: _isUpdating
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text('Confirmar'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // =========================
+  // Confirmar Exclusão
+  // =========================
+  void _confirmarExclusaoCorretora(int id, String nome) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2d2d2d),
+        title:
+            const Text('Confirmar Exclusão', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Deseja realmente excluir a corretora "$nome"? Esta ação não poderá ser desfeita.',
+          style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+            child:
+                const Text('Cancelar', style: TextStyle(color: Colors.white70)),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () async {
-              await CorretoraService().excluirCorretora(id);
               Navigator.pop(context);
-              _carregarCorretoras();
+              try {
+                await _service.excluirCorretora(id);
+                _carregarCorretoras();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Corretora excluída com sucesso.'),
+                    backgroundColor: Color(0xFF34a853),
+                  ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Erro ao excluir: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
-            child: const Text('Excluir', style: TextStyle(color: Colors.redAccent)),
+            style:
+                ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            child: const Text('Excluir'),
           ),
         ],
-      );
-    },
-  );
-}
+      ),
+    );
+  }
 
+  // =========================
+  // Input padrão (estilo Estratégias)
+  // =========================
+  Widget _inputOutlined({
+    required TextEditingController controller,
+    required String label,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      style: const TextStyle(color: Colors.white),
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white30)),
+        focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFF4285f4))),
+      ),
+    );
+  }
 }

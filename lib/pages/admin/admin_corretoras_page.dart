@@ -93,28 +93,19 @@ class _AdminCorretorasPageState extends State<AdminCorretorasPage>
     );
   }
 
+  // ===== Header sem seta =====
   Widget _buildHeader(bool isMobile) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Corretoras',
-              style: TextStyle(
-                fontSize: isMobile ? 20 : 24,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ],
+        Text(
+          'Corretoras',
+          style: TextStyle(
+            fontSize: isMobile ? 20 : 24,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
         const TopoFixo(),
       ],
@@ -288,7 +279,7 @@ class _AdminCorretorasPageState extends State<AdminCorretorasPage>
 
           const SizedBox(height: 12),
 
-          // Linhas de detalhes (seguindo tipografia da página de estratégias)
+          // Linhas de detalhes
           if ((c.email ?? '').isNotEmpty) _linhaInfo(Icons.email, c.email!),
           if ((c.telefone ?? '').isNotEmpty)
             Padding(
@@ -321,9 +312,7 @@ class _AdminCorretorasPageState extends State<AdminCorretorasPage>
     );
   }
 
-  // =========================
   // Dialog: CRIAR
-  // =========================
   void _showCreateCorretoraDialog() {
     final _formKey = GlobalKey<FormState>();
     final _nome = TextEditingController();
@@ -421,9 +410,7 @@ class _AdminCorretorasPageState extends State<AdminCorretorasPage>
     );
   }
 
-  // =========================
   // Dialog: EDITAR
-  // =========================
   void _showEditarCorretoraDialog(Corretora c) {
     final _formKey = GlobalKey<FormState>();
     final _nome = TextEditingController(text: c.nome);
@@ -524,9 +511,7 @@ class _AdminCorretorasPageState extends State<AdminCorretorasPage>
     );
   }
 
-  // =========================
   // Confirmar Exclusão
-  // =========================
   void _confirmarExclusaoCorretora(int id, String nome) {
     showDialog(
       context: context,
@@ -574,9 +559,7 @@ class _AdminCorretorasPageState extends State<AdminCorretorasPage>
     );
   }
 
-  // =========================
-  // Input padrão (estilo Estratégias)
-  // =========================
+  // Input padrão
   Widget _inputOutlined({
     required TextEditingController controller,
     required String label,
@@ -586,7 +569,9 @@ class _AdminCorretorasPageState extends State<AdminCorretorasPage>
       controller: controller,
       style: const TextStyle(color: Colors.white),
       validator: validator,
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
+        labelText: 'label', // será sobrescrito abaixo
+      ).copyWith(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white70),
         enabledBorder: const OutlineInputBorder(

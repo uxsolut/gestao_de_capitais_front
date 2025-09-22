@@ -159,6 +159,7 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
     );
   }
 
+  // ===== Header com seta invisível (mantém espaçamento) =====
   Widget _buildHeader(bool isMobile) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -167,9 +168,15 @@ class _AdminEstrategiasPageState extends State<AdminEstrategiasPage>
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+            // ocupa o espaço do IconButton, mas sem interação e invisível
+            IgnorePointer(
+              child: Opacity(
+                opacity: 0,
+                child: IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                ),
+              ),
             ),
             const SizedBox(width: 8),
             Text(

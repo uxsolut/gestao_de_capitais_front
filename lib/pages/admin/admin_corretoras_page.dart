@@ -93,19 +93,35 @@ class _AdminCorretorasPageState extends State<AdminCorretorasPage>
     );
   }
 
-  // ===== Header sem seta =====
+  // ===== Header com “seta invisível” para manter o espaçamento =====
   Widget _buildHeader(bool isMobile) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          'Corretoras',
-          style: TextStyle(
-            fontSize: isMobile ? 20 : 24,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Ocupa o mesmo espaço do IconButton padrão (48px), mas invisível e sem clique
+            IgnorePointer(
+              child: Opacity(
+                opacity: 0,
+                child: IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Corretoras',
+              style: TextStyle(
+                fontSize: isMobile ? 20 : 24,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
         const TopoFixo(),
       ],
